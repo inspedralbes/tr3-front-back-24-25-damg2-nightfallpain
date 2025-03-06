@@ -2,6 +2,8 @@
   "dependencies": {
     "express": "^4.21.2",
     "mongoose": "^8.12.1",
-    "node-modules": "^1.0.1"
+    "mysql2": "^3.13.0",
+    "node-modules": "^1.0.1",
+    "sequelize": "^6.37.6"
   }
 }

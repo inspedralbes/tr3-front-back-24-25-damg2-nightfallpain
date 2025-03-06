@@ -1,7 +1,7 @@
 const express = require('express');
-const conectarDB = require('./config/db');
-const Partida = require('./models/Partida');
-const Estadistiques = require('./models/Estadistiques');
+const conectarDB = require('./config/mongo'); // Conexión a MongoDB
+const { sequelize } = require('./models'); // Conexión a Sequelize
+const routes = require('./routes');
 
 const app = express();
 app.use(express.json());
@@ -9,25 +9,13 @@ app.use(express.json());
 // Conectar a MongoDB
 conectarDB();
 
-// Ruta para crear una partida
-app.post('/api/partida', async (req, res) => {
-    try {
-        const nuevaPartida = await Partida.create(req.body);
-        res.status(201).json(nuevaPartida);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
+// Conectar a Sequelize (SQL)
+sequelize.authenticate()
+    .then(() => console.log('Conexión a la base de datos SQL establecida.'))
+    .catch(err => console.error('Error al conectar a la base de datos SQL:', err));
 
-// Ruta para crear estadísticas
-app.post('/api/estadistiques', async (req, res) => {
-    try {
-        const nuevaEstadistica = await Estadistiques.create(req.body);
-        res.status(201).json(nuevaEstadistica);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
+// Usar rutas
+app.use('/api', routes);
 
 // Iniciar servidor
 const PORT = process.env.PORT || 5000;

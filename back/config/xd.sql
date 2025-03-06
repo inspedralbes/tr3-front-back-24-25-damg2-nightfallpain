@@ -5,7 +5,7 @@ CREATE TABLE Usuaris_Jugadors (
     contrasenya VARCHAR(255) NOT NULL, 
     data_registre TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
     es_admin BOOLEAN DEFAULT FALSE, 
-    XP INT DEFAULT 0
+    points INT DEFAULT 0
 );
 
 CREATE TABLE Armes (

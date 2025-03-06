@@ -1,14 +1,10 @@
-const mongoose = require('mongoose');
+const { Sequelize } = require('sequelize');
 
-const conectarDB = async () => {
-    try {
-        await mongoose.connect('mongodb+srv://a23ikedelgra:a23ikedelgra@estadistiques.nj1ar.mongodb.net/NightfallPainDB', {
-        });
-        console.log('✅ Conexión a MongoDB exitosa');
-    } catch (error) {
-        console.error('❌ Error conectando a MongoDB:', error);
-        process.exit(1);
-    }
-};
+// Configuración de Sequelize para conectarse al contenedor MySQL
+const sequelize = new Sequelize('mydatabase', 'myuser', 'mypassword', {
+    host: 'mysql_db', // Nombre del contenedor MySQL
+    dialect: 'mysql', // Usamos MySQL
+    logging: false, // Desactiva los logs de SQL en la consola
+});
 
-module.exports = conectarDB;
+module.exports = sequelize;
