@@ -2,22 +2,22 @@ version: '3.8'
 
 services:
   mysql:
-    image: mysql:latest
+    image: mysql:8.0
     container_name: mysql_db
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: mydatabase
       MYSQL_USER: myuser
-      MYSQL_PASSWORD: 
+      MYSQL_PASSWORD: mypassword  # Añade una contraseña aquí
     volumes:
-      - ./mysql_data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql  # Usa un volumen nombrado
     ports:
       - "3306:3306"
 
   adminer:
     image: adminer
-    container_name: adminer
+    container_name: adminer_db
     restart: always
     ports:
       - "8080:8080"
@@ -29,7 +29,7 @@ services:
     volumes:
       - ./public_html:/usr/local/apache2/htdocs
     ports:
-      - "81:81"
+      - "81:80"  # Cambia 81:81 a 81:80
 
   portainer:
     image: portainer/portainer-ce
