@@ -1,12 +1,12 @@
 <template>
-  <div class="auth-background">
+  <div class="cyber-background">
     <v-container>
-      <v-card class="auth-card mx-auto" max-width="450" rounded="lg" elevation="5">
-        <h1 class="text-center pt-5">Bienvenido</h1>
+      <v-card class="auth-card mx-auto" max-width="450" rounded="lg" elevation="5" color="#0F1923">
+        <h1 class="text-center pt-5 cyberpunk-title">BIENVENIDO</h1>
         
-        <v-tabs v-model="tab" background-color="transparent" slider-color="primary" centered>
-          <v-tab value="login">Iniciar Sesión</v-tab>
-          <v-tab value="register">Registrarse</v-tab>
+        <v-tabs v-model="tab" background-color="transparent" slider-color="#9C27B0" centered>
+          <v-tab value="login" class="cyber-text" color="#9C27B0">INICIAR SESIÓN</v-tab>
+          <v-tab value="register" class="cyber-text" color="#9C27B0">REGISTRARSE</v-tab>
         </v-tabs>
         
         <v-card-text>
@@ -19,6 +19,9 @@
                   label="Email"
                   prepend-inner-icon="mdi-email"
                   variant="outlined"
+                  color="#9C27B0"
+                  bg-color="#151C27"
+                  class="cyber-input"
                 ></v-text-field>
                 
                 <v-text-field
@@ -29,15 +32,18 @@
                   :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
                   @click:append-inner="showPassword = !showPassword"
                   variant="outlined"
+                  color="#9C27B0"
+                  bg-color="#151C27"
+                  class="cyber-input"
                 ></v-text-field>
                 
                 <v-btn 
                   type="submit" 
                   block 
-                  color="primary"
-                  class="mt-4"
+                  color="#9C27B0"
+                  class="mt-4 cyber-button"
                 >
-                  Iniciar Sesión
+                  <span class="text-white font-weight-bold">INICIAR SESIÓN</span>
                 </v-btn>
               </v-form>
             </v-window-item>
@@ -50,6 +56,9 @@
                   label="Nombre"
                   prepend-inner-icon="mdi-account"
                   variant="outlined"
+                  color="#9C27B0"
+                  bg-color="#151C27"
+                  class="cyber-input"
                 ></v-text-field>
                 
                 <v-text-field
@@ -58,6 +67,9 @@
                   type="email"
                   prepend-inner-icon="mdi-email"
                   variant="outlined"
+                  color="#9C27B0"
+                  bg-color="#151C27"
+                  class="cyber-input"
                 ></v-text-field>
                 
                 <v-text-field
@@ -65,16 +77,21 @@
                   label="Contraseña"
                   :type="showPassword ? 'text' : 'password'"
                   prepend-inner-icon="mdi-lock"
+                  :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+                  @click:append-inner="showPassword = !showPassword"
                   variant="outlined"
+                  color="#9C27B0"
+                  bg-color="#151C27"
+                  class="cyber-input"
                 ></v-text-field>
                 
                 <v-btn 
                   type="submit" 
                   block 
-                  color="primary"
-                  class="mt-4"
+                  color="#9C27B0"
+                  class="mt-4 cyber-button"
                 >
-                  Registrarse
+                  <span class="text-white font-weight-bold">REGISTRARSE</span>
                 </v-btn>
               </v-form>
             </v-window-item>
@@ -101,36 +118,34 @@ export default {
     // URL base de la API
     const API_URL = "http://localhost:5000/api/usuarios";
 
-    // FUNCIÓN PARA INICIAR SESIÓN CON VERIFICACIÓN DE ADMIN
     // FUNCIÓN PARA INICIAR SESIÓN MODIFICADA
-const handleLogin = async () => {
-  try {
-    const response = await fetch(`${API_URL}/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: login.value.email,
-        contrasenya: login.value.password,
-      }),
-    });
+    const handleLogin = async () => {
+      try {
+        const response = await fetch(`${API_URL}/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: login.value.email,
+            contrasenya: login.value.password,
+          }),
+        });
 
-    const data = await response.json();
+        const data = await response.json();
 
-    if (!response.ok) throw new Error(data.error || "Error al iniciar sesión");
+        if (!response.ok) throw new Error(data.error || "Error al iniciar sesión");
 
-    // Verificación de admin en el frontend
-    if (data.usuario && data.usuario.es_admin === true) {
-      localStorage.setItem("usuario", JSON.stringify(data.usuario));
-      router.push("/admin");
-    } else {
-      alert("Acceso solo disponible para administradores");
-      localStorage.removeItem("usuario"); // Limpiar credenciales
-    }
-  } catch (error) {
-    alert(error.message);
-  }
-};
-
+        // Verificación de admin en el frontend
+        if (data.usuario && data.usuario.es_admin === true) {
+          localStorage.setItem("usuario", JSON.stringify(data.usuario));
+          router.push("/admin");
+        } else {
+          alert("Acceso solo disponible para administradores");
+          localStorage.removeItem("usuario"); // Limpiar credenciales
+        }
+      } catch (error) {
+        alert(error.message);
+      }
+    };
 
     // FUNCIÓN PARA REGISTRAR USUARIO
     const handleRegister = async () => {
@@ -177,8 +192,10 @@ const handleLogin = async () => {
 </script>
 
 <style scoped>
-.auth-background {
-  background: linear-gradient(to right, #6a11cb, #2575fc);
+.cyber-background {
+  background-color: #151C27;
+  background-image: linear-gradient(rgba(15, 25, 35, 0.9), rgba(15, 25, 35, 0.85)), 
+                    repeating-linear-gradient(90deg, rgba(156, 39, 176, 0.1) 0px, rgba(156, 39, 176, 0.1) 1px, transparent 1px, transparent 7px);
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -186,5 +203,73 @@ const handleLogin = async () => {
 
 .auth-card {
   padding-bottom: 20px;
+  border: 1px solid rgba(156, 39, 176, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(to right, transparent, #CE93D8, transparent);
+}
+
+.cyberpunk-title {
+  font-family: 'Arial', sans-serif;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #9C27B0;
+  margin-bottom: 10px;
+}
+
+.cyber-text {
+  font-family: 'Arial', sans-serif;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.cyber-input :deep(.v-field__outline) {
+  color: #CE93D8 !important;
+}
+
+.cyber-input :deep(.v-field__field) {
+  color: white !important;
+}
+
+.cyber-input :deep(.v-field__input) {
+  color: white !important;
+}
+
+.cyber-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border: 1px solid #9C27B0;
+}
+
+.cyber-button:hover {
+  background-color: #CE93D8 !important;
+  border-color: #CE93D8;
+}
+
+.cyber-button:hover span {
+  color: #0F1923 !important;
+}
+
+/* Para los tabs */
+:deep(.v-tab--selected) {
+  color: #CE93D8 !important;
+}
+
+:deep(.v-tab:not(.v-tab--selected)) {
+  opacity: 0.7;
+}
+
+:deep(.v-tabs .v-slide-group__content) {
+  border-bottom: 1px solid rgba(156, 39, 176, 0.3);
 }
 </style>
