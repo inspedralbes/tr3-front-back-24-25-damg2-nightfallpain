@@ -36,6 +36,19 @@
             </v-list-item-icon>
             <v-list-item-title>Skins</v-list-item-title>
           </v-list-item>
+          <v-list-item to="/admin/estadistica" link>
+          <v-list-item-icon>
+            <v-icon>mdi-chart-bar</v-icon>
+          </v-list-item-icon>
+          <v-list-item-title>Estadística</v-list-item-title>
+        </v-list-item>
+
+        <v-list-item to="/admin/tienda" link>
+          <v-list-item-icon>
+            <v-icon>mdi-store</v-icon>
+          </v-list-item-icon>
+          <v-list-item-title>Tienda</v-list-item-title>
+        </v-list-item>
         </v-list>
       </v-navigation-drawer>
   

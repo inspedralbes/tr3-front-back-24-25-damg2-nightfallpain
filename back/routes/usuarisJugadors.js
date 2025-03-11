@@ -34,28 +34,37 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// 📌 INICIAR SESIÓN (sin JWT)
+// 📌 INICIAR SESIÓN (versión modificada)
 router.post('/login', async (req, res) => {
     try {
         const { email, contrasenya } = req.body;
 
-        // Verificar si el usuario existe
         const user = await UsuarisJugadors.findOne({ where: { email } });
         if (!user) {
             return res.status(400).json({ error: 'Correo o contraseña incorrectos' });
         }
 
-        // Comparar contraseñas
         const isMatch = await bcrypt.compare(contrasenya, user.contrasenya);
         if (!isMatch) {
             return res.status(400).json({ error: 'Correo o contraseña incorrectos' });
         }
 
-        res.json({ message: 'Inicio de sesión exitoso', user });
+        // Respuesta modificada para ambos tipos de usuario
+        res.json({
+            message: 'Inicio de sesión exitoso',
+            usuario: {
+                id: user.id,
+                nom: user.nom,
+                email: user.email,
+                es_admin: user.es_admin
+            }
+        });
     } catch (error) {
         res.status(500).json({ error: 'Error en el inicio de sesión' });
     }
 });
+
+
 // 📌 OBTENER TODOS LOS USUARIOS
 router.get('/all', async (req, res) => {
     try {
