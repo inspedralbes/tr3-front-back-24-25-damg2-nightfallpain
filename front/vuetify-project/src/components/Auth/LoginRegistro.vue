@@ -75,7 +75,6 @@
     </v-container>
   </div>
 </template>
-
 <script>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
@@ -87,19 +86,77 @@ export default {
     const register = ref({ name: "", email: "", password: "" });
     const router = useRouter();
 
-    const handleLogin = () => {
-      console.log("Login con: ", login.value);
-      router.push("/dashboard");
+    // 📌 URL base de la API (ajusta según tu backend)
+    const API_URL = "http://localhost:5000/api/usuarios";
+
+    // 📌 FUNCIÓN PARA INICIAR SESIÓN
+    const handleLogin = async () => {
+      try {
+        const response = await fetch(`${API_URL}/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: login.value.email,
+            contrasenya: login.value.password, // Debe coincidir con el backend
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Error al iniciar sesión");
+        }
+
+        console.log("Inicio de sesión exitoso:", data);
+        alert("Inicio de sesión exitoso");
+
+        // Redirigir a dashboard
+        router.push("/dashboard");
+      } catch (error) {
+        console.error("Error en el login:", error.message);
+        alert(error.message);
+      }
     };
 
-    const handleRegister = () => {
-      console.log("Registro con: ", register.value);
+    // 📌 FUNCIÓN PARA REGISTRAR USUARIO
+    const handleRegister = async () => {
+      try {
+        const response = await fetch(`${API_URL}/register`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            nom: register.value.name,
+            email: register.value.email,
+            contrasenya: register.value.password, // Debe coincidir con el backend
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Error al registrar usuario");
+        }
+
+        console.log("Registro exitoso:", data);
+        alert("Usuario registrado con éxito");
+
+        // Cambiar a la pestaña de login automáticamente
+        tab.value = "login";
+      } catch (error) {
+        console.error("Error en el registro:", error.message);
+        alert(error.message);
+      }
     };
 
     return { tab, login, register, handleLogin, handleRegister };
   },
 };
 </script>
+
 
 <style scoped>
 .lila-background {

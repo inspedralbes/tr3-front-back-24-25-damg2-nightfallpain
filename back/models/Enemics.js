@@ -16,8 +16,8 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        comportament: {
-            type: DataTypes.TEXT,
+        velocidad: {
+            type: DataTypes.INTEGER,
             allowNull: false,
         },
     });
