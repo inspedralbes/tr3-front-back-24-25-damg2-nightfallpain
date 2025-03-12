@@ -33,7 +33,7 @@
 
         <v-list-item to="/admin/partida" link class="cyber-item mb-2">
           <v-list-item-icon>
-            <v-icon color="#9C27B0">mdi-game-crew</v-icon>
+            <v-icon color="#9C27B0">mdi-gamepad-variant</v-icon>
           </v-list-item-icon>
           <v-list-item-title class="cyber-text">PARTIDA</v-list-item-title>
         </v-list-item>
@@ -82,35 +82,38 @@ export default {
 }
 
 .cyberpunk-title {
-  font-family: 'Arial', sans-serif;
-  font-weight: 800;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: bold;
+  text-transform: uppercase;
   letter-spacing: 1px;
   color: #9C27B0;
+  text-shadow: 0 0 5px #9C27B0, 0 0 10px #9C27B0;
 }
 
 .cyber-text {
-  font-family: 'Arial', sans-serif;
+  font-family: 'Orbitron', sans-serif;
   font-weight: 600;
+  text-transform: uppercase;
   letter-spacing: 0.5px;
+  transition: color 0.3s ease-in-out;
 }
 
 .cyber-item {
   border-left: 3px solid transparent;
   transition: all 0.3s ease;
+  padding: 10px;
+  border-radius: 4px;
 }
 
 .cyber-item:hover {
   background: linear-gradient(90deg, rgba(0, 225, 255, 0.15), rgba(15, 25, 35, 0));
   border-left: 3px solid #00E1FF;
+  box-shadow: 0 0 10px rgba(0, 225, 255, 0.3);
 }
 
 .cyber-item:hover .v-list-item__title {
   color: #00E1FF;
-}
-
-.cyber-border {
-  border: 2px solid #9C27B0;
-  background-color: #0F1923;
+  text-shadow: 0 0 5px #00E1FF;
 }
 
 .v-list-item__icon {
