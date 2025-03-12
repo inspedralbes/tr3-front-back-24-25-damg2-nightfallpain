@@ -31,11 +31,11 @@
           <v-list-item-title class="cyber-text">ARMAS</v-list-item-title>
         </v-list-item>
 
-        <v-list-item to="/admin/skins" link class="cyber-item mb-2">
+        <v-list-item to="/admin/partida" link class="cyber-item mb-2">
           <v-list-item-icon>
-            <v-icon color="#9C27B0">mdi-tshirt-crew</v-icon>
+            <v-icon color="#9C27B0">mdi-game-crew</v-icon>
           </v-list-item-icon>
-          <v-list-item-title class="cyber-text">SKINS</v-list-item-title>
+          <v-list-item-title class="cyber-text">PARTIDA</v-list-item-title>
         </v-list-item>
 
         <v-list-item to="/admin/estadistica" link class="cyber-item mb-2">

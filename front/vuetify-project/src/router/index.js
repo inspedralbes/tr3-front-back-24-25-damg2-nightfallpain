@@ -6,7 +6,7 @@ import Tienda from "@/components/Admin/Tienda.vue";
 import Usuarios from "@/components/Admin/Usuarios.vue";
 import Enemigos from "@/components/Admin/Enemigos.vue";
 import Armas from "@/components/Admin/Armas.vue";
-import Skins from "@/components/Admin/Skins.vue";
+import Partida from "@/components/Admin/Partida.vue";
 
 const routes = [
   {
@@ -22,7 +22,7 @@ const routes = [
       { path: "usuarios", name: "Usuarios", component: Usuarios },
       { path: "enemigos", name: "Enemigos", component: Enemigos },
       { path: "armas", name: "Armas", component: Armas },
-      { path: "skins", name: "Skins", component: Skins },
+      { path: "partida", name: "Partida", component: Partida },
       { path: "estadistica", name: "Estadistica", component: Estadistica },
       { path: "tienda", name: "Tienda", component: Tienda },
     ],
