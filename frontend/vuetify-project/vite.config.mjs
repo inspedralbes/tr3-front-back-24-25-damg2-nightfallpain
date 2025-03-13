@@ -2,7 +2,6 @@
 import Components from 'unplugin-vue-components/vite'
 import Vue from '@vitejs/plugin-vue'
 import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
-import ViteFonts from 'unplugin-fonts/vite'
 import VueRouter from 'unplugin-vue-router/vite'
 
 // Utilities
@@ -16,45 +15,32 @@ export default defineConfig({
     Vue({
       template: { transformAssetUrls }
     }),
-    // https://github.com/vuetifyjs/vuetify-loader/tree/master/packages/vite-plugin#readme
     Vuetify({
       autoImport: true,
-      styles: {
-        configFile: 'src/styles/settings.scss',
-      },
+      styles: { configFile: 'src/styles/settings.scss' },
     }),
     Components(),
-    ViteFonts({
-      google: {
-        families: [{
-          name: 'Roboto',
-          styles: 'wght@100;300;400;500;700;900',
-        }],
-      },
-    }),
   ],
-  define: { 'process.env': {} },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
-    extensions: [
-      '.js',
-      '.json',
-      '.jsx',
-      '.mjs',
-      '.ts',
-      '.tsx',
-      '.vue',
-    ],
   },
   server: {
-    port: 3000,
+    host: '0.0.0.0', // Permite acceso desde fuera del contenedor
+    port: 5173,
+    strictPort: true, // Garantiza que use este puerto y no cambie automáticamente
+    watch: {
+      usePolling: true, // Necesario para hot reload en Docker
+    },
+    hmr: {
+      host: '0.0.0.0', // Asegura que HMR funcione correctamente en Docker
+    },
   },
   css: {
     preprocessorOptions: {
-      sass: {
-        api: 'modern-compiler',
+      scss: {
+        additionalData: `@import "/app/fontend/vuetify-project/src/styles/settings.scss";`, // Usa SCSS en lugar de Sass indentado
       },
     },
   },

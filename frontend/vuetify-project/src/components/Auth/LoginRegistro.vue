@@ -9,7 +9,7 @@
           </v-tab>
           <v-tab value="register">
             <v-icon left>mdi-account-plus</v-icon>
-            Registro
+            iker
           </v-tab>
         </v-tabs>
         <v-card-text>
