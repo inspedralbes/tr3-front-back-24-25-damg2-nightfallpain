@@ -2,16 +2,16 @@
 FROM node:18-alpine
 
 # Establecemos el directorio de trabajo
-WORKDIR /app/fontend/vuetify-project
+WORKDIR /app/frontend
 
 # Copiamos los archivos de dependencia
-COPY package*.json ./
+COPY ./vuetify-project/package*.json ./
 
 # Instalamos dependencias
 RUN npm install
 
 # Copiamos el resto del código
-COPY . .
+COPY ./vuetify-project .
 
 # Exponemos el puerto
 EXPOSE 5173

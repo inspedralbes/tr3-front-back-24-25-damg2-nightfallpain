@@ -54,7 +54,7 @@ services:
   frontend:
     image: frontend
     build:
-      context: ../frontend/vuetify-project
+      context: ../frontend
       dockerfile: ./Dockerfile.frontend
     container_name: frontend
     restart: always
@@ -62,7 +62,7 @@ services:
       - "5173:5173"  # Exponemos el puerto por defecto de Vite
     volumes:
       - ../frontend/vuetify-project:/app/frontend
-      - /app/frontend/vuetify-project/node_modules
+      - /app/frontend/node_modules
     environment:
       - CHOKIDAR_USEPOLLING=true  # Permite detección de cambios en archivos
     networks:
