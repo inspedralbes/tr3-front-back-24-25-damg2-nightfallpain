@@ -4,19 +4,19 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.CHAR(36),
             primaryKey: true,
         },
-        nom: {
+        name: {
             type: DataTypes.STRING(255),
             allowNull: false,
         },
-        vida: {
+        health: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        atac: {
+        damage: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        velocidad: {
+        speed: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },

@@ -8,7 +8,7 @@ router.use('/estadistiques', require('./estadistiques'));
 // Rutas de SQL
 router.use('/usuaris-jugadors', require('./usuarisJugadors'));
 router.use('/armes', require('./armes'));
-router.use('/skins', require('./skins'));
+router.use('/shop', require('./shops'));
 router.use('/enemics', require('./enemics'));
 
 module.exports = router;

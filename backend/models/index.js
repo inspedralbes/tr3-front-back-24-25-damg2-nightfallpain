@@ -4,11 +4,11 @@ const sequelize = require('../config/db'); // Importar la configuración de Sequ
 // Cargar modelos
 const UsuarisJugadors = require('./UsuarisJugadors')(sequelize, DataTypes);
 const Armes = require('./Armes')(sequelize, DataTypes);
-const Skins = require('./Skins')(sequelize, DataTypes);
+const Shop = require('./Shops')(sequelize, DataTypes);
 const Enemics = require('./Enemics')(sequelize, DataTypes);
 
 // Establecer relaciones (si las hay)
-Skins.belongsTo(UsuarisJugadors, { foreignKey: 'usuari_id', onDelete: 'CASCADE' });
+Shop.belongsTo(UsuarisJugadors, { foreignKey: 'usuari_id', onDelete: 'CASCADE' });
 
 // Sincronizar modelos con la base de datos (opcional)
 sequelize.sync()
@@ -20,6 +20,6 @@ module.exports = {
     sequelize,
     UsuarisJugadors,
     Armes,
-    Skins,
+    Shop,
     Enemics,
 };

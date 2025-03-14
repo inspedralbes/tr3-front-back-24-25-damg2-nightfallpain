@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.CHAR(36),
             primaryKey: true,
         },
-        nom: {
+        name: {
             type: DataTypes.STRING(255),
             allowNull: false,
         },
@@ -13,21 +13,41 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             unique: true,
         },
-        contrasenya: {
+        password: {
             type: DataTypes.STRING(255),
             allowNull: false,
         },
-        data_registre: {
+        date_register: {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW,
         },
-        es_admin: {
+        admin: {
             type: DataTypes.BOOLEAN,
             defaultValue: false,
         },
-        points: {
+        xp: {
             type: DataTypes.INTEGER,
             defaultValue: 0,
+        },
+        speed:{
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
+        health:{
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
+        damage:{
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
+        arma:{
+            type: DataTypes.STRING(255),
+            allowNull: false,
+        },
+        shop:{
+            type: DataTypes.JSON,
+            allowNull: false,
         },
     }, {
         timestamps: false  // 🚀 Esto desactiva createdAt y updatedAt

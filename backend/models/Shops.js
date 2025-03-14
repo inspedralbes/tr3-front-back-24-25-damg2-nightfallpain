@@ -1,34 +1,34 @@
 module.exports = (sequelize, DataTypes) => {
-    const Skins = sequelize.define('Skins', {
+    const Shop = sequelize.define('Shop', {
         id: {
             type: DataTypes.CHAR(36),
             primaryKey: true,
         },
-        usuari_id: {
-            type: DataTypes.CHAR(36),
-            allowNull: false,
-        },
-        nom: {
+        name: {
             type: DataTypes.STRING(255),
             allowNull: false,
         },
-        preu: {
+        price: {
             type: DataTypes.DECIMAL(10, 2),
             allowNull: false,
         },
-        data_compra: {
-            type: DataTypes.DATE,
-            defaultValue: DataTypes.NOW,
+        type: {
+            type: DataTypes.STRING(255),
+            allowNull: false,
+        },
+        image: {
+            type: DataTypes.STRING(255),
+            allowNull: false,
         },
     });
 
     // Relación con UsuarisJugadors
-    Skins.associate = (models) => {
-        Skins.belongsTo(models.UsuarisJugadors, {
+    Shop.associate = (models) => {
+        Shop.belongsTo(models.UsuarisJugadors, {
             foreignKey: 'usuari_id',
             onDelete: 'CASCADE',
         });
     };
 
-    return Skins;
+    return Shop;
 };
