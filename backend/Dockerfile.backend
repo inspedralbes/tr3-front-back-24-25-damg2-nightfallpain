@@ -1,0 +1,22 @@
+# Utilizamos una imagen oficial de Node.js
+FROM node:18-alpine
+
+# Establecemos el directorio de trabajo
+WORKDIR /app/backend
+# Copiamos los archivos de dependencia
+COPY ./package*.json ./
+
+# Instalamos dependencias
+RUN npm install
+
+# Copiamos el resto del código
+COPY . .
+
+# Exponemos el puerto
+EXPOSE 3000
+
+RUN npm install -g nodemon
+
+# Comando de inicio
+CMD ["npm", "run", "dev" ]
+

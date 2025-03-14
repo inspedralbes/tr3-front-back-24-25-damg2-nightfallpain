@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  # Servicio de MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - ./mysql_data:/var/lib/mysql  # Usa un volumen nombrado
+    ports:
+      - "3306:3306"
+    networks:
+      - red1 # Conectamos MySQL a la red
+
+  # Servicio de Adminer para gestionar la base de datos
+  adminer:
+    image: adminer
+    container_name: adminer_db
+    restart: always
+    ports:
+      - "8080:8080"
+    networks:
+      - red1  # Conectamos Adminer a la red para acceder a MySQL
+
+  # Servicio del Backend (Node.js)
+  backend:
+    build:
+      context: ../backend
+      dockerfile: ./Dockerfile.backend
+    container_name: backend
+    restart: always
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - MYSQL_HOST=${MYSQL_HOST}  # Conexión al contenedor de MySQL
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    ports:
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
+    volumes:
+      - ../backend:/app/backend
+
+    networks:
+      - red1  # Conectamos el backend a la red
+
+  # Servicio del Frontend (Vue.js)
+  frontend:
+    image: frontend
+    build:
+      context: ../frontend
+      dockerfile: ./Dockerfile.frontend
+    container_name: frontend
+    restart: always
+    ports:
+      - "5173:5173"  # Exponemos el puerto por defecto de Vite
+    volumes:
+      - ../frontend/vuetify-project:/app/frontend
+      - /app/frontend/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true  # Permite detección de cambios en archivos
+    networks:
+      - red1 # Conectamos el frontend a la red
+
+  # Servicio de Portainer (para administrar Docker)
+  portainer:
+    image: portainer/portainer-ce
+    container_name: portainer
+    restart: always
+    ports:
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    networks:
+      - red1  # Opcional, si deseas que Portainer esté en la misma red
+
+volumes:
+  mysql_data:
+  portainer_data:
+
+networks:
+  red1:  # Red interna para los contenedores
+    driver: bridge  # Usamos el driver de red por defecto, pero puedes ajustarlo según tus necesidades.
