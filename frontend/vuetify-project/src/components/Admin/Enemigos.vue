@@ -17,7 +17,16 @@
         </v-card-title>
         
         <v-card-text>
-          <!-- Tabla de enemigos con método de selección corregido -->
+          <!-- Encabezados fijos sobre la tabla -->
+          <div class="custom-header d-flex mb-2">
+            <div style="width: 10%" class="header-cell">ID</div>
+            <div style="width: 30%" class="header-cell">Nom</div>
+            <div style="width: 20%" class="header-cell">Health</div>
+            <div style="width: 20%" class="header-cell">Damage</div>
+            <div style="width: 20%" class="header-cell">Speed</div>
+          </div>
+          
+          <!-- Tabla de enemigos con método de selección corregido y sin cabeceras predeterminadas -->
           <v-data-table
             :headers="headers"
             :items="enemigos"
@@ -26,15 +35,16 @@
             :items-per-page="10"
             item-key="id"
             dark
+            hide-default-header
           >
             <!-- Usando slot personalizado para cada fila -->
             <template v-slot:item="{ item }">
               <tr @click="seleccionarEnemigo(item)">
-                <td>{{ item.id }}</td>
-                <td>{{ item.name }}</td>
-                <td>{{ item.health }}</td>
-                <td>{{ item.damage }}</td>
-                <td>{{ item.speed }}</td>
+                <td style="width: 10%">{{ item.id }}</td>
+                <td style="width: 30%">{{ item.name }}</td>
+                <td style="width: 20%">{{ item.health }}</td>
+                <td style="width: 20%">{{ item.damage }}</td>
+                <td style="width: 20%">{{ item.speed }}</td>
               </tr>
             </template>
           </v-data-table>
@@ -75,7 +85,7 @@
                     v-model.number="enemigoSeleccionado.health"
                     color="#ff2c2c"
                     min="0"
-                    max="100"
+                    max="200"
                     hide-details
                     class="neon-slider"
                   ></v-slider>
@@ -94,7 +104,7 @@
                     v-model.number="enemigoSeleccionado.damage"
                     color="#ff9800"
                     min="0"
-                    max="50"
+                    max="100"
                     hide-details
                     class="neon-slider"
                   ></v-slider>
@@ -113,7 +123,7 @@
                     v-model.number="enemigoSeleccionado.speed"
                     color="#2196f3"
                     min="0"
-                    max="20"
+                    max="100"
                     hide-details
                     class="neon-slider"
                   ></v-slider>
@@ -129,6 +139,14 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+
+      <!-- Snackbar para notificaciones (versión actualizada) -->
+      <v-snackbar v-model="snackbar.show" :color="snackbar.color" :timeout="3000" dark>
+        {{ snackbar.text }}
+        <template v-slot:action="{ attrs }">
+          <v-btn text v-bind="attrs" @click="snackbar.show = false" class="neon-button">Cerrar</v-btn>
+        </template>
+      </v-snackbar>
     </v-container>
   </div>
 </template>
@@ -141,20 +159,34 @@ export default {
       search: '',
       dialogoAbierto: false,
       headers: [
-        { text: "ID", value: "id", align: "start" },
-        { text: "Nom", value: "name" },
-        { text: "Health", value: "health" },
-        { text: "Damage", value: "damage" },
-        { text: "Speed", value: "speed" },
+        { text: "ID", value: "id", align: "start", width: "10%" },
+        { text: "Nom", value: "name", width: "30%" },
+        { text: "Health", value: "health", width: "20%" },
+        { text: "Damage", value: "damage", width: "20%" },
+        { text: "Speed", value: "speed", width: "20%" },
       ],
       enemigos: [],
       enemigoSeleccionado: null,
+      snackbar: {
+        show: false,
+        text: '',
+        color: 'success',
+        timeout: 3000
+      }
     };
   },
   mounted() {
     this.cargarEnemigos();
   },
   methods: {
+    mostrarSnackbar(mensaje, color = 'success') {
+      this.snackbar = {
+        show: true,
+        text: mensaje,
+        color: color,
+        timeout: 3000
+      };
+    },
     cargarEnemigos() {
       fetch(`${import.meta.env.VITE_API_URL}api/enemics/all`)
         .then(response => {
@@ -189,6 +221,7 @@ export default {
         })
         .catch(error => {
           console.error('Error al cargar los enemigos:', error);
+          this.mostrarSnackbar('Error al cargar els enemics: ' + error.message, 'error');
         });
     },
     seleccionarEnemigo(item) {
@@ -197,6 +230,7 @@ export default {
       
       if (!item || typeof item !== 'object' || item instanceof Event) {
         console.error("Objeto enemigo no válido o evento recibido:", item);
+        this.mostrarSnackbar("Error al seleccionar l'enemic", 'error');
         return;
       }
       
@@ -206,6 +240,7 @@ export default {
       // Verificar que tengamos un ID válido
       if (!this.enemigoSeleccionado.id) {
         console.error("Enemigo sin ID válido:", this.enemigoSeleccionado);
+        this.mostrarSnackbar("L'enemic no té un ID vàlid", 'error');
         return;
       }
       
@@ -218,6 +253,7 @@ export default {
     guardarCambios() {
       if (!this.enemigoSeleccionado || !this.enemigoSeleccionado.id) {
         console.error("No se puede guardar: ID del enemigo no disponible", this.enemigoSeleccionado);
+        this.mostrarSnackbar("No es pot desar: ID de l'enemic no disponible", 'error');
         return;
       }
       
@@ -256,8 +292,8 @@ export default {
           };
         }
         
-        // Mostrar notificación de éxito (puedes implementar un sistema de notificaciones)
-        alert('Enemigo actualizado correctamente');
+        // Mostrar notificación de éxito con el snackbar
+        this.mostrarSnackbar('Enemic actualitzat correctament');
         
         this.cerrarDialogo();
         
@@ -265,8 +301,8 @@ export default {
         this.cargarEnemigos();
       })
       .catch(error => {
-        console.error('Error al guardar cambios:', error);
-        alert('Error al guardar los cambios: ' + error.message);
+        console.error('Error al guardar canvis:', error);
+        this.mostrarSnackbar('Error al guardar els canvis: ' + error.message, 'error');
       });
     }
   }
@@ -325,6 +361,22 @@ export default {
 .cyber-table {
   background-color: #151C27 !important;
   color: white;
+}
+
+/* Encabezados personalizados */
+.custom-header {
+  background-color: #252d3d;
+  border-bottom: 2px solid rgba(156, 39, 176, 0.8);
+  margin-bottom: 0 !important;
+  padding: 8px 0;
+}
+
+.header-cell {
+  color: #9C27B0;
+  text-shadow: 0 0 5px #9C27B0;
+  font-weight: bold;
+  font-size: 1.1rem;
+  padding: 0 16px;
 }
 
 .v-data-table ::v-deep tbody tr {

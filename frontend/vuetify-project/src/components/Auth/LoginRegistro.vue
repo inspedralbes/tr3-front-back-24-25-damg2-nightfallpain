@@ -37,12 +37,7 @@
                   class="cyber-input"
                 ></v-text-field>
                 
-                <v-btn 
-                  type="submit" 
-                  block 
-                  color="#9C27B0"
-                  class="mt-4 cyber-button"
-                >
+                <v-btn type="submit" block color="#9C27B0" class="mt-4 cyber-button">
                   <span class="text-white font-weight-bold">ACCEDIR</span>
                 </v-btn>
               </v-form>
@@ -85,12 +80,7 @@
                   class="cyber-input"
                 ></v-text-field>
                 
-                <v-btn 
-                  type="submit" 
-                  block 
-                  color="#9C27B0"
-                  class="mt-4 cyber-button"
-                >
+                <v-btn type="submit" block color="#9C27B0" class="mt-4 cyber-button">
                   <span class="text-white font-weight-bold">REGISTRARSE</span>
                 </v-btn>
               </v-form>
@@ -99,6 +89,14 @@
         </v-card-text>
       </v-card>
     </v-container>
+    
+    <!-- Snackbar -->
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" :timeout="3000" dark>
+      {{ snackbar.message }}
+      <template v-slot:action="{ attrs }">
+        <v-btn text v-bind="attrs" @click="snackbar.show = false" class="neon-button">Cerrar</v-btn>
+      </template>
+    </v-snackbar>
   </div>
 </template>
 
@@ -113,81 +111,62 @@ export default {
     const register = ref({ name: "", email: "", password: "" });
     const router = useRouter();
     const showPassword = ref(false);
-    const errorMessage = ref("");
+    const snackbar = ref({ show: false, message: "", color: "success" });
 
-    // FUNCIÓN PARA INICIAR SESIÓN
+    const showSnackbar = (message, color = "success") => {
+      snackbar.value = { show: true, message, color };
+    };
+
     const handleLogin = async () => {
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}api/usuarios/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: login.value.email,
-            password: login.value.password,
-          }),
+          body: JSON.stringify({ email: login.value.email, password: login.value.password }),
         });
-
         const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Error al inicia sesió");
 
-        if (!response.ok) throw new Error(data.error || "Error al iniciar sesión");
-
-        // Verificación de admin en el frontend
-        if (data.usuario && data.usuario.admin === true) {
-          localStorage.setItem("usuario", JSON.stringify(data.usuario));
+        if (data.user && data.user.admin === true) {
+          localStorage.setItem("usuario", JSON.stringify(data.user));
           router.push("/admin");
+          showSnackbar("Inici de sesió reeixit", "success");
         } else {
-          alert("Acceso solo disponible para administradores");
-          localStorage.removeItem("usuario"); // Limpiar credenciales
+          showSnackbar("Accés només per a administradors", "error");
+          localStorage.removeItem("usuario");
         }
       } catch (error) {
-        alert(error.message);
+        showSnackbar(error.message, "error");
       }
     };
 
-    // FUNCIÓN PARA REGISTRAR USUARIO
     const handleRegister = async () => {
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}api/usuarios/register`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             name: register.value.name,
             email: register.value.email,
             password: register.value.password,
-            admin: 0, // Por defecto, los usuarios registrados no son admin
-            speed: 10,    // Valores predeterminados
+            admin: 0,
+            speed: 10,
             health: 100,
             damage: 25,
             arma: "espada",
-            shop: "Tienda1"
+            shop: "Tienda1",
           }),
         });
-
         const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || "Error al registrar usuario");
-        }
-
-        alert("Usuario registrado. Solo los administradores pueden acceder al sistema.");
+        if (!response.ok) throw new Error(data.error || "Error al registrar l'usuari");
+        showSnackbar("Registre reeixit. Només admins poden accedir.", "success");
         tab.value = "login";
       } catch (error) {
-        console.error("Error en el registro:", error.message);
-        alert(error.message);
+        showSnackbar(error.message, "error");
       }
     };
 
-    return { 
-      tab, 
-      login, 
-      register, 
-      handleLogin, 
-      handleRegister, 
-      showPassword,
-      errorMessage
-    };
+    return { tab, login, register, handleLogin, handleRegister, showPassword, snackbar };
   },
 };
 </script>
