@@ -2,21 +2,36 @@ const express = require('express');
 const router = express.Router();
 const { Enemics } = require('../models');
 
-// Crear un nuevo enemigo
-router.post('/', async (req, res) => {
+// Obtener todos los enemigos
+router.get('/all', async (req, res) => {
     try {
-        const newEnemic = await Enemics.create(req.body);
-        res.status(201).json(newEnemic);
+        const enemics = await Enemics.findAll();
+        res.status(200).json(enemics);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
 
-// Obtener todos los enemigos
-router.get('/', async (req, res) => {
+// Actualizar la vida, daño o velocidad de un enemigo específico
+router.put('/update/:id', async (req, res) => {
+    const { id } = req.params; // ID del enemigo
+    const { health, damage, speed } = req.body; // Los nuevos valores a actualizar
+    
     try {
-        const enemics = await Enemics.findAll();
-        res.status(200).json(enemics);
+        const enemy = await Enemics.findByPk(id);
+        
+        if (!enemy) {
+            return res.status(404).json({ message: 'Enemigo no encontrado' });
+        }
+
+        // Solo actualizamos las propiedades que se proporcionan
+        if (health !== undefined) enemy.health = health;
+        if (damage !== undefined) enemy.damage = damage;
+        if (speed !== undefined) enemy.speed = speed;
+
+        await enemy.save(); // Guardamos los cambios en la base de datos
+
+        res.status(200).json(enemy); // Respondemos con el enemigo actualizado
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

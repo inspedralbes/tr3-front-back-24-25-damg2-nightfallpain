@@ -3,6 +3,7 @@ const cors = require('cors'); // Importar CORS
 const conectarDB = require('./config/mongo'); // Conexión a MongoDB
 const { sequelize } = require('./models'); // Conexión a Sequelize
 const usuariosRoutes = require('./routes/usuarisJugadors');
+const enemicsRoutes = require('./routes/enemics');
 
 const app = express();
 app.use(express.json());
@@ -16,6 +17,7 @@ app.use(cors({
 
 // Usar rutas
 app.use('/api/usuarios', usuariosRoutes);
+app.use('/api/enemics', enemicsRoutes);
 
 // Conectar a MongoDB
 conectarDB();
