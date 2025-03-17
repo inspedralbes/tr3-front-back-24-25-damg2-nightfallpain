@@ -2,10 +2,10 @@
   <div class="cyber-background">
     <v-container>
       <v-card class="auth-card mx-auto" max-width="450" rounded="lg" elevation="5" color="#0F1923">
-        <h1 class="text-center pt-5 cyberpunk-title">BIENVENIDO</h1>
+        <h1 class="text-center pt-5 cyberpunk-title">NightFall Pain Admin</h1>
         
         <v-tabs v-model="tab" background-color="transparent" slider-color="#9C27B0" centered>
-          <v-tab value="login" class="cyber-text" color="#9C27B0">INICIAR SESIÓN</v-tab>
+          <v-tab value="login" class="cyber-text" color="#9C27B0">INICIAR SESIÓ</v-tab>
           <v-tab value="register" class="cyber-text" color="#9C27B0">REGISTRARSE</v-tab>
         </v-tabs>
         
@@ -26,7 +26,7 @@
                 
                 <v-text-field
                   v-model="login.password"
-                  label="Contraseña"
+                  label="Password"
                   :type="showPassword ? 'text' : 'password'"
                   prepend-inner-icon="mdi-lock"
                   :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
@@ -43,7 +43,7 @@
                   color="#9C27B0"
                   class="mt-4 cyber-button"
                 >
-                  <span class="text-white font-weight-bold">INICIAR SESIÓN</span>
+                  <span class="text-white font-weight-bold">ACCEDIR</span>
                 </v-btn>
               </v-form>
             </v-window-item>
@@ -53,7 +53,7 @@
               <v-form @submit.prevent="handleRegister">
                 <v-text-field
                   v-model="register.name"
-                  label="Nombre"
+                  label="Name"
                   prepend-inner-icon="mdi-account"
                   variant="outlined"
                   color="#9C27B0"
@@ -74,7 +74,7 @@
                 
                 <v-text-field
                   v-model="register.password"
-                  label="Contraseña"
+                  label="Password"
                   :type="showPassword ? 'text' : 'password'"
                   prepend-inner-icon="mdi-lock"
                   :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
@@ -115,7 +115,7 @@ export default {
     const showPassword = ref(false);
     const errorMessage = ref("");
 
-    // FUNCIÓN PARA INICIAR SESIÓN MODIFICADA
+    // FUNCIÓN PARA INICIAR SESIÓN
     const handleLogin = async () => {
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}api/usuarios/login`, {
@@ -123,7 +123,7 @@ export default {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             email: login.value.email,
-            contrasenya: login.value.password,
+            password: login.value.password,
           }),
         });
 
@@ -132,7 +132,7 @@ export default {
         if (!response.ok) throw new Error(data.error || "Error al iniciar sesión");
 
         // Verificación de admin en el frontend
-        if (data.usuario && data.usuario.es_admin === true) {
+        if (data.usuario && data.usuario.admin === true) {
           localStorage.setItem("usuario", JSON.stringify(data.usuario));
           router.push("/admin");
         } else {
@@ -153,11 +153,15 @@ export default {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            nom: register.value.name,
+            name: register.value.name,
             email: register.value.email,
-            contrasenya: register.value.password,
-            // Por defecto, los usuarios registrados no son admin
-            es_admin: 0
+            password: register.value.password,
+            admin: 0, // Por defecto, los usuarios registrados no son admin
+            speed: 10,    // Valores predeterminados
+            health: 100,
+            damage: 25,
+            arma: "espada",
+            shop: "Tienda1"
           }),
         });
 
@@ -187,6 +191,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped>
 .cyber-background {
@@ -221,6 +226,9 @@ export default {
   letter-spacing: 2px;
   color: #9C27B0;
   margin-bottom: 10px;
+}
+.form-container {
+  margin-top: 20px; /* Puedes ajustar este valor según sea necesario */
 }
 
 .cyber-text {

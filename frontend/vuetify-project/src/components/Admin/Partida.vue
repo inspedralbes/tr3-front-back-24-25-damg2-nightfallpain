@@ -3,7 +3,7 @@
     <v-container class="mt-n10">
       <v-card class="auth-card mx-auto" max-width="900" rounded="lg" elevation="5">
         <v-card-title class="neon-text">
-          Listado de Partidas
+          Listat de Partides
           <v-spacer></v-spacer>
           <v-text-field
             v-model="search"
@@ -16,6 +16,16 @@
         </v-card-title>
 
         <v-card-text>
+          <!-- Encabezados fijos sobre la tabla -->
+          <div class="custom-header d-flex mb-2">
+            <div style="width: 10%" class="header-cell">ID</div>
+            <div style="width: 20%" class="header-cell">User ID</div>
+            <div style="width: 21%" class="header-cell">Type Game</div>
+            <div style="width: 12%" class="header-cell">Status</div>
+            <div style="width: 17%" class="header-cell">Cooperative</div>
+            <div style="width: 20%" class="header-cell">Actions</div>
+          </div>
+          
           <v-data-table
             :headers="headers"
             :items="partidas"
@@ -23,6 +33,7 @@
             :loading="loading"
             class="elevation-1 neon-table cyber-table"
             dark
+            hide-default-header
           >
             <template v-slot:item.tipus_partida="{ item }">
               <v-chip
@@ -74,15 +85,15 @@
         <v-card-text>
           <v-list-item>
             <v-list-item-content>
-              <v-list-item-title class="neon-text">ID Partida: {{ selectedPartida.id }}</v-list-item-title>
-              <v-list-item-subtitle class="neon-text">Jugador: {{ selectedPartida.usuari_id }}</v-list-item-subtitle>
+              <v-list-item-title class="neon-text">Game ID: {{ selectedPartida.id }}</v-list-item-title>
+              <v-list-item-subtitle class="neon-text">Player: {{ selectedPartida.usuari_id }}</v-list-item-subtitle>
             </v-list-item-content>
           </v-list-item>
           <v-divider class="my-2"></v-divider>
           <div class="mt-3">
-            <p class="neon-text">Tipo: {{ selectedPartida.tipus_partida }}</p>
-            <p class="neon-text">Estado: {{ selectedPartida.estat }}</p>
-            <p class="neon-text" v-if="selectedPartida.id_coperative">ID Cooperativo: {{ selectedPartida.id_coperative }}</p>
+            <p class="neon-text">Type: {{ selectedPartida.tipus_partida }}</p>
+            <p class="neon-text">Status: {{ selectedPartida.estat }}</p>
+            <p class="neon-text" v-if="selectedPartida.id_coperative">Cooperative: {{ selectedPartida.id_coperative }}</p>
           </div>
         </v-card-text>
         <v-card-actions>
@@ -97,10 +108,10 @@
       <v-card class="dark-card">
         <v-card-title class="neon-text">
           <v-icon left color="warning">mdi-wrench</v-icon>
-          Modo Mantenimiento
+          Mode Mantenimient
         </v-card-title>
         <v-card-text class="neon-text">
-          ¿Estás seguro de que deseas poner en mantenimiento la partida ID {{ selectedPartida?.id }}?
+          Estás segur de que vols posar en manteniment la partida ID {{ selectedPartida?.id }}?
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -146,7 +157,7 @@ export default {
     });
 
     const headers = ref([
-      { text: "ID", value: "id", align: "center", width: "10%" },
+      { text: "ID", value: "id", width: "10%" },
       { text: "Jugador ID", value: "usuari_id", width: "20%" },
       { text: "Tipo de Partida", value: "tipus_partida", width: "20%" },
       { text: "Estado", value: "estat", width: "15%" },
@@ -253,5 +264,21 @@ export default {
 
 .neon-chip {
   box-shadow: 0 0 5px currentColor;
+}
+
+/* Estilos para los encabezados personalizados */
+.custom-header {
+  background-color: #252d3d;
+  border-bottom: 2px solid rgba(156, 39, 176, 0.8);
+  margin-bottom: 0 !important;
+  padding: 8px 0;
+}
+
+.header-cell {
+  color: #9C27B0;
+  text-shadow: 0 0 5px #9C27B0;
+  font-weight: bold;
+  font-size: 1.1rem;
+  padding: 0 16px;
 }
 </style>

@@ -4,10 +4,10 @@
       <v-card class="cyber-card">
         <v-row align="center" class="header-row">
           <v-col>
-            <v-card-title class="neon-text">Tienda Cyberpunk</v-card-title>
+            <v-card-title class="neon-text">Botiga Cyberpunk</v-card-title>
           </v-col>
           <v-col class="text-right">
-            <v-btn class="neon-button" @click="abrirDialogo(null)">Añadir Producto</v-btn>
+            <v-btn class="neon-button" @click="abrirDialogo(null)">Nou Producte</v-btn>
           </v-col>
         </v-row>
       </v-card>
@@ -15,11 +15,11 @@
       <v-row>
         <v-col v-for="(producto, index) in productos" :key="index" cols="12" sm="6" md="4">
           <v-card class="product-card">
-            <v-img v-if="producto.imagen" :src="producto.imagen" height="200px" contain></v-img>
-            <v-card-title>{{ producto.titulo }}</v-card-title>
+            <v-img v-if="producto.imatge" :src="producto.imatge" height="200px" contain></v-img>
+            <v-card-title>{{ producto.títol }}</v-card-title>
             <v-card-text>
-              <p class="descripcion">{{ producto.descripcion }}</p>
-              <p class="precio">Precio: ${{ producto.precio }}</p>
+              <p class="descripcion">{{ producto.descripció }}</p>
+              <p class="precio">Preu: ${{ producto.preu }}</p>
             </v-card-text>
             <v-card-actions>
               <v-btn class="neon-button-edit" small @click="abrirDialogo(index)">Editar</v-btn>
@@ -33,13 +33,13 @@
       <v-dialog v-model="dialogoAbierto" max-width="500px">
         <v-card class="cyber-card">
           <v-card-title class="neon-text">
-            {{ editandoIndex !== null ? 'Editar Producto' : 'Añadir Producto' }}
+            {{ editandoIndex !== null ? 'Editar Producte' : 'Nou Producte' }}
           </v-card-title>
           <v-card-text>
-            <v-text-field v-model="nuevoProducto.titulo" label="Título" class="cyber-input" dark></v-text-field>
-            <v-textarea v-model="nuevoProducto.descripcion" label="Descripción" class="cyber-input" dark></v-textarea>
-            <v-text-field v-model.number="nuevoProducto.precio" label="Precio" type="number" class="cyber-input" dark></v-text-field>
-            <v-file-input v-model="nuevoProducto.imagenArchivo" label="Subir Imagen" accept="image/*" class="cyber-input" dark @change="cargarImagen"></v-file-input>
+            <v-text-field v-model="nuevoProducto.títol" label="Títol" class="cyber-input" dark></v-text-field>
+            <v-textarea v-model="nuevoProducto.descripció" label="Descripció" class="cyber-input" dark></v-textarea>
+            <v-text-field v-model.number="nuevoProducto.preu" label="Preu" type="number" class="cyber-input" dark></v-text-field>
+            <v-file-input v-model="nuevoProducto.imagenArchivo" label="Pujar Imatge" accept="image/*" class="cyber-input" dark @change="cargarImagen"></v-file-input>
           </v-card-text>
           <v-card-actions>
             <v-btn class="neon-button-cancel" text @click="cerrarDialogo">Cancelar</v-btn>
@@ -58,15 +58,15 @@ export default {
     return {
       productos: [
         {
-          titulo: "Cyber Sword X99",
-          descripcion: "Espada de plasma con filo de nanocarbono.",
-          precio: 2500,
-          imagen: "https://i1.sndcdn.com/artworks-WubUsyqnNUX5OzzX-WmyBMA-t1080x1080.jpg"
+          títol: "Cyber Sword X99",
+          descripció: "Espada de plasma con filo de nanocarbono.",
+          preu: 2500,
+          imatge: "https://i1.sndcdn.com/artworks-WubUsyqnNUX5OzzX-WmyBMA-t1080x1080.jpg"
         }
       ],
       dialogoAbierto: false,
       editandoIndex: null,
-      nuevoProducto: { titulo: "", descripcion: "", precio: 0, imagen: null, imagenArchivo: null }
+      nuevoProducto: { títol: "", descripció: "", preu: 0, imatge: null, imagenArchivo: null }
     };
   },
   methods: {
@@ -75,7 +75,7 @@ export default {
       if (index !== null) {
         this.nuevoProducto = { ...this.productos[index] };
       } else {
-        this.nuevoProducto = { titulo: "", descripcion: "", precio: 0, imagen: null, imagenArchivo: null };
+        this.nuevoProducto = { títol: "", descripció: "", preu: 0, imatge: null, imagenArchivo: null };
       }
       this.dialogoAbierto = true;
     },
@@ -98,7 +98,7 @@ export default {
       if (file) {
         const reader = new FileReader();
         reader.onload = (e) => {
-          this.nuevoProducto.imagen = e.target.result;
+          this.nuevoProducto.imatge = e.target.result;
         };
         reader.readAsDataURL(file);
       }

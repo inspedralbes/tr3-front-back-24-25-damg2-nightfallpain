@@ -3,7 +3,7 @@
     <v-container class="mt-n10">
       <v-card class="auth-card mx-auto" max-width="900" rounded="lg" elevation="5">
         <v-card-title class="neon-text">
-          Listado de Usuarios
+          Llistat d'usuaris
           <v-spacer></v-spacer>
           <v-text-field
             v-model="search"
@@ -16,6 +16,13 @@
         </v-card-title>
 
         <v-card-text>
+          <!-- Encabezados fijos sobre la tabla -->
+          <div class="custom-header d-flex mb-2">
+            <div style="width: 32%" class="header-cell">Name</div>
+            <div style="width: 48%" class="header-cell">Email</div>
+            <div style="width: 15%" class="header-cell">Actions</div>
+          </div>
+          
           <v-data-table
             :headers="headers"
             :items="usuarios"
@@ -23,13 +30,11 @@
             :loading="loading"
             class="elevation-1 neon-table cyber-table"
             dark
+            hide-default-header
           >
-            <template v-slot:item.nom="{ item }">
+            <template v-slot:item.name="{ item }">
               <div class="d-flex align-center">
-                <v-avatar size="32" class="neon-avatar">
-                  <span class="neon-text">{{ item.nom.charAt(0) }}</span>
-                </v-avatar>
-                {{ item.nom }}
+                {{ item.name }}
               </div>
             </template>
 
@@ -51,17 +56,17 @@
     <!-- Diálogo de visualización de usuario -->
     <v-dialog v-model="viewDialog" max-width="400">
       <v-card class="dark-card" v-if="selectedUser">
-        <v-card-title class="neon-text">Información de Usuario</v-card-title>
+        <v-card-title class="neon-text">Informació de l'usuari</v-card-title>
         <v-card-text>
-          <v-list-item>
-            <v-list-item-avatar color="primary">
-              <span class="white--text">{{ selectedUser.nom?.charAt(0) }}</span>
-            </v-list-item-avatar>
-            <v-list-item-content>
-              <v-list-item-title class="neon-text">{{ selectedUser.nom }}</v-list-item-title>
-              <v-list-item-subtitle class="neon-text">{{ selectedUser.email }}</v-list-item-subtitle>
-            </v-list-item-content>
-          </v-list-item>
+          <v-list dense>
+            <v-list-item v-for="(value, key) in filteredUserInfo" :key="key">
+              <v-list-item-content>
+                <v-list-item-title>
+                  <strong class="neon-text">{{ key }}:</strong> {{ value }}
+                </v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -78,7 +83,7 @@
           Confirmar eliminación
         </v-card-title>
         <v-card-text class="neon-text">
-          ¿Estás seguro de que deseas eliminar a {{ selectedUser?.nom }}?
+          ¿Estás seguro de que deseas eliminar a {{ selectedUser?.name }}?
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -100,11 +105,10 @@
 </template>
 
 <script>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 
 export default {
   setup() {
-    
     const usuarios = ref([]);
     const search = ref("");
     const loading = ref(false);
@@ -118,16 +122,21 @@ export default {
     });
 
     const headers = ref([
-      { text: "Nombre", value: "nom", width: "30%" },
-      { text: "Email", value: "email", width: "50%" },
-      { text: "Acciones", value: "actions", sortable: false, align: "center" }
+      { text: "Nombre", value: "name", width: "30%" },
+      { text: "Email", value: "email", width: "45%" },
+      { text: "Acciones", value: "actions", sortable: false, align: "center", width: "15%" }
     ]);
+
+    const filteredUserInfo = computed(() => {
+      if (!selectedUser.value) return {};
+      const { name, email, ...rest } = selectedUser.value;
+      return rest;
+    });
 
     const fetchUsuarios = async () => {
       loading.value = true;
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}api/usuarios/all`);
-        console.log(import.meta.env.VITE_API_URL);
         if (!response.ok) throw new Error("Error al obtener usuarios");
         usuarios.value = await response.json();
       } catch (error) {
@@ -147,7 +156,7 @@ export default {
           throw new Error(errorData.error || "Error al eliminar");
         }
         usuarios.value = usuarios.value.filter(user => user.id !== id);
-        showSnackbar("Usuario eliminado correctamente", "success");
+        showSnackbar("Usuari eliminat correctament", "success");
       } catch (error) {
         showSnackbar(error.message, "error");
         console.error(error);
@@ -159,7 +168,7 @@ export default {
 
     const viewUser = (user) => {
       if (!user) {
-        showSnackbar("Error: usuario inválido", "error");
+        showSnackbar("Error: usuari invàlid", "error");
         return;
       }
       selectedUser.value = user;
@@ -179,7 +188,8 @@ export default {
 
     return {
       headers, usuarios, search, loading, viewDialog, deleteDialog,
-      selectedUser, snackbar, deleteUser, viewUser, confirmDelete
+      selectedUser, snackbar, deleteUser, viewUser, confirmDelete,
+      filteredUserInfo
     };
   }
 };
@@ -190,14 +200,9 @@ export default {
   background-color: #151C27;
   min-height: 100vh;
   display: flex;
-  align-items: flex-start; /* Esto sube el contenido */
+  align-items: flex-start;
   justify-content: center;
-  padding-top: 40px; /* Puedes ajustar este valor */
-}
-
-
-.mt-n10 {
-  margin-top: -200px; /* Eleva el recuadro */
+  padding-top: 40px;
 }
 
 .auth-card, .dark-card {
@@ -232,11 +237,19 @@ export default {
   color: white !important;
 }
 
-.v-dialog {
-  background-color: #1E2633 !important;
+/* Estilos para los encabezados personalizados */
+.custom-header {
+  background-color: #252d3d;
+  border-bottom: 2px solid rgba(156, 39, 176, 0.8);
+  margin-bottom: 0 !important;
+  padding: 8px 0;
 }
 
-.v-snackbar {
-  background-color: #1E2633 !important;
+.header-cell {
+  color: #9C27B0;
+  text-shadow: 0 0 5px #9C27B0;
+  font-weight: bold;
+  font-size: 1.1rem;
+  padding: 0 16px;
 }
 </style>

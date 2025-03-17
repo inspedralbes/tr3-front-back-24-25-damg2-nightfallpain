@@ -6,38 +6,42 @@ const { UsuarisJugadors } = require('../models');
 const router = express.Router();
 
 // 📌 REGISTRAR USUARIO
-router.post('/register', async (req, res) => {
+router.post("/register", async (req, res) => {
     try {
-        const { nom, email, contrasenya } = req.body;
+        const { name, email, password, speed, health, damage, arma, shop } = req.body;
 
         // Verificar si el usuario ya existe
         const existingUser = await UsuarisJugadors.findOne({ where: { email } });
         if (existingUser) {
-            return res.status(400).json({ error: 'El correo ya está registrado' });
+            return res.status(400).json({ error: "El correo ya está registrado" });
         }
 
-        // Encriptar la contraseña
-        const hashedPassword = await bcrypt.hash(contrasenya, 10);
+        // Encriptar la password
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Crear usuario
+        // Crear usuario con valores por defecto si no se envían
         const newUser = await UsuarisJugadors.create({
             id: crypto.randomUUID(),
-            nom,
+            name,
             email,
-            contrasenya: hashedPassword,
+            password: hashedPassword,
+            speed: speed || 10,      // Valor por defecto: 10
+            health: health || 100,   // Valor por defecto: 100
+            damage: damage || 25,    // Valor por defecto: 25
+            arma: arma || "espada",  // Valor por defecto: "espada"
+            shop: shop || "Tienda1"  // Valor por defecto: "Tienda1"
         });
 
-        res.status(201).json({ message: 'Usuario registrado con éxito', user: newUser });
+        res.status(201).json({ message: "Usuario registrado con éxito", user: newUser });
     } catch (error) {
-        res.status(500).json({ error: 'Error al registrar el usuario', details: error.message });
-
+        res.status(500).json({ error: "Error al registrar el usuario", details: error.message });
     }
 });
 
 // 📌 INICIAR SESIÓN (sin JWT)
 router.post('/login', async (req, res) => {
     try {
-        const { email, contrasenya } = req.body;
+        const { email, password } = req.body;
 
         // Verificar si el usuario existe
         const user = await UsuarisJugadors.findOne({ where: { email } });
@@ -46,7 +50,7 @@ router.post('/login', async (req, res) => {
         }
 
         // Comparar contraseñas
-        const isMatch = await bcrypt.compare(contrasenya, user.contrasenya);
+        const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(400).json({ error: 'Correo o contraseña incorrectos' });
         }

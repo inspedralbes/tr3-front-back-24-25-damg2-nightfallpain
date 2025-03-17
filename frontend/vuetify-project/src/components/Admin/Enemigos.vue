@@ -3,7 +3,7 @@
     <v-container>
       <v-card class="auth-card mx-auto" max-width="900" rounded="lg" elevation="5">
         <v-card-title class="neon-text">
-          Gestión de Enemigos
+          Gestió d'enemics
           <v-spacer></v-spacer>
           <v-text-field
             v-model="search"
@@ -16,7 +16,16 @@
           ></v-text-field>
         </v-card-title>
         
+        <!-- Encabezados fijos sobre la tabla -->
         <v-card-text>
+          <div class="custom-header d-flex mb-2">
+            <div style="width: 12%" class="header-cell">ID</div>
+            <div style="width: 35%" class="header-cell">Name</div>
+            <div style="width: 18%" class="header-cell">Health</div>
+            <div style="width: 17%" class="header-cell">Damage</div>
+            <div style="width: 15%" class="header-cell">Speed</div>
+          </div>
+          
           <v-data-table
             :headers="headers"
             :items="enemigos"
@@ -25,6 +34,7 @@
             :items-per-page="10"
             @click:row="seleccionarEnemigo"
             dark
+            hide-default-header
           ></v-data-table>
         </v-card-text>
       </v-card>
@@ -32,7 +42,7 @@
       <v-dialog v-model="dialogoAbierto" max-width="500px">
         <v-card v-if="enemigoSeleccionado" class="dark-card">
           <v-card-title class="headline neon-text">
-            Editar {{ enemigoSeleccionado.nombre }}
+            Editant {{ enemigoSeleccionado.nombre }}
           </v-card-title>
           
           <v-card-text class="pt-4">
@@ -41,7 +51,7 @@
                 <v-sheet rounded class="pa-3 dark-sheet">
                   <div class="d-flex align-center mb-2">
                     <v-icon color="#ff2c2c" class="mr-2">mdi-heart</v-icon>
-                    <span class="font-weight-bold neon-text-alt">Vida</span>
+                    <span class="font-weight-bold neon-text-alt">Health</span>
                     <v-spacer></v-spacer>
                     <span class="text-h6 neon-value">{{ Math.round(enemigoSeleccionado.vida) }}</span>
                   </div>
@@ -60,7 +70,7 @@
                 <v-sheet rounded class="pa-3 dark-sheet">
                   <div class="d-flex align-center mb-2">
                     <v-icon color="#ff9800" class="mr-2">mdi-sword</v-icon>
-                    <span class="font-weight-bold neon-text-alt">Ataque</span>
+                    <span class="font-weight-bold neon-text-alt">Damage</span>
                     <v-spacer></v-spacer>
                     <span class="text-h6 neon-value">{{ Math.round(enemigoSeleccionado.daño) }}</span>
                   </div>
@@ -79,7 +89,7 @@
                 <v-sheet rounded class="pa-3 dark-sheet">
                   <div class="d-flex align-center mb-2">
                     <v-icon color="#2196f3" class="mr-2">mdi-lightning-bolt</v-icon>
-                    <span class="font-weight-bold neon-text-alt">Velocidad</span>
+                    <span class="font-weight-bold neon-text-alt">Speed</span>
                     <v-spacer></v-spacer>
                     <span class="text-h6 neon-value">{{ Math.round(enemigoSeleccionado.velocidad) }}</span>
                   </div>
@@ -155,14 +165,12 @@ export default {
 };
 </script>
 
-
 <style scoped>
 .cyber-background {
   background-color: #151C27;
   min-height: 100vh;
   display: flex;
   align-items: flex-start;
-  
 }
 
 .auth-card, .dark-card {
@@ -224,7 +232,24 @@ export default {
   background-color: rgba(156, 39, 176, 0.1) !important;
 }
 
+/* Estilos para los encabezados personalizados */
+.custom-header {
+  background-color: #252d3d;
+  border-bottom: 2px solid rgba(156, 39, 176, 0.8);
+  margin-bottom: 0 !important;
+  padding: 8px 0;
+}
+
+.header-cell {
+  color: #9C27B0;
+  text-shadow: 0 0 5px #9C27B0;
+  font-weight: bold;
+  font-size: 1.1rem;
+  padding: 0 16px;
+}
+
 .neon-slider .v-slider__track-fill {
   box-shadow: 0 0 10px currentColor;
 }
+
 </style>

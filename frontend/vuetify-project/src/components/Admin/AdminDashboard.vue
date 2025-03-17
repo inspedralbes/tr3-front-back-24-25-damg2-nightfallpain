@@ -3,7 +3,7 @@
     <!-- Barra superior estilo cyberpunk -->
     <v-app-bar app color="#0F1923" dark elevation="3">
       <v-app-bar-nav-icon color="#9C27B0" @click="drawer = !drawer"></v-app-bar-nav-icon>
-      <v-toolbar-title class="cyberpunk-title">PANEL DE CONTROL</v-toolbar-title>
+      <v-toolbar-title class="cyberpunk-title">PANELL ADMINISTRATIU</v-toolbar-title>
       <v-spacer></v-spacer>
     </v-app-bar>
 
@@ -14,42 +14,42 @@
           <v-list-item-icon>
             <v-icon color="#9C27B0">mdi-account-group</v-icon>
           </v-list-item-icon>
-          <v-list-item-title class="cyber-text">USUARIOS</v-list-item-title>
+          <v-list-item-title class="cyber-text">USUARIS</v-list-item-title>
         </v-list-item>
 
         <v-list-item to="/admin/enemigos" link class="cyber-item mb-2">
           <v-list-item-icon>
             <v-icon color="#9C27B0">mdi-skull</v-icon>
           </v-list-item-icon>
-          <v-list-item-title class="cyber-text">ENEMIGOS</v-list-item-title>
+          <v-list-item-title class="cyber-text">ENEMICS</v-list-item-title>
         </v-list-item>
 
         <v-list-item to="/admin/armas" link class="cyber-item mb-2">
           <v-list-item-icon>
             <v-icon color="#9C27B0">mdi-pistol</v-icon>
           </v-list-item-icon>
-          <v-list-item-title class="cyber-text">ARMAS</v-list-item-title>
+          <v-list-item-title class="cyber-text">ARMES</v-list-item-title>
         </v-list-item>
 
         <v-list-item to="/admin/partida" link class="cyber-item mb-2">
           <v-list-item-icon>
             <v-icon color="#9C27B0">mdi-gamepad-variant</v-icon>
           </v-list-item-icon>
-          <v-list-item-title class="cyber-text">PARTIDA</v-list-item-title>
+          <v-list-item-title class="cyber-text">PARTIDES</v-list-item-title>
         </v-list-item>
 
         <v-list-item to="/admin/estadistica" link class="cyber-item mb-2">
           <v-list-item-icon>
             <v-icon color="#9C27B0">mdi-chart-bar</v-icon>
           </v-list-item-icon>
-          <v-list-item-title class="cyber-text">ESTADÍSTICAS</v-list-item-title>
+          <v-list-item-title class="cyber-text">ESTADÍSTIQUES</v-list-item-title>
         </v-list-item>
 
         <v-list-item to="/admin/tienda" link class="cyber-item mb-2">
           <v-list-item-icon>
             <v-icon color="#9C27B0">mdi-store</v-icon>
           </v-list-item-icon>
-          <v-list-item-title class="cyber-text">TIENDA</v-list-item-title>
+          <v-list-item-title class="cyber-text">BOTIGA</v-list-item-title>
         </v-list-item>
       </v-list>
     </v-navigation-drawer>

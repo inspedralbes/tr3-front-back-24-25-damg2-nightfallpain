@@ -2,14 +2,14 @@
   <div class="cyber-background">
     <v-container class="cyber-container">
       <v-card class="cyber-card">
-        <v-card-title class="neon-text">Gráfico de Estadísticas</v-card-title>
+        <v-card-title class="neon-text">Estadístiques</v-card-title>
         
         <v-card-text>
           <!-- Selector de correo -->
           <v-select
             v-model="correoSeleccionado"
             :items="correos"
-            label="Seleccionar usuario"
+            label="Selecciona un usuari"
             class="cyber-input"
             dark
           ></v-select>
