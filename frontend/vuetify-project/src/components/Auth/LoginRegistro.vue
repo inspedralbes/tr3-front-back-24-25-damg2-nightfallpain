@@ -118,28 +118,47 @@ export default {
     };
 
     const handleLogin = async () => {
-      try {
+    try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}api/usuarios/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: login.value.email, password: login.value.password }),
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: login.value.email, password: login.value.password }),
         });
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || "Error al inicia sesió");
 
         if (data.user && data.user.admin === true) {
-          localStorage.setItem("usuario", JSON.stringify(data.user));
-          router.push("/admin");
-          showSnackbar("Inici de sesió reeixit", "success");
+            localStorage.setItem("token", data.token); // Almacenar el token
+            localStorage.setItem("usuario", JSON.stringify(data.user));
+            router.push("/admin");
+            showSnackbar("Inici de sesió reeixit", "success");
         } else {
-          showSnackbar("Accés només per a administradors", "error");
-          localStorage.removeItem("usuario");
+            showSnackbar("Accés només per a administradors", "error");
+            localStorage.removeItem("usuario");
         }
-      } catch (error) {
+    } catch (error) {
         showSnackbar(error.message, "error");
-      }
-    };
+    }
+};
+const fetchAdminData = async () => {
+    const token = localStorage.getItem("token");
 
+    try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}api/admin/dashboard`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            }
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Error al obtener datos del dashboard");
+
+        console.log(data);
+    } catch (error) {
+        console.error(error);
+    }
+};
     const handleRegister = async () => {
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}api/usuarios/register`, {

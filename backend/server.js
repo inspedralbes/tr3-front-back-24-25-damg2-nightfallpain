@@ -4,6 +4,7 @@ const conectarDB = require('./config/mongo'); // Conexión a MongoDB
 const { sequelize } = require('./models'); // Conexión a Sequelize
 const usuariosRoutes = require('./routes/usuarisJugadors');
 const enemicsRoutes = require('./routes/enemics');
+const shopRoutes = require('./routes/shops');
 
 const app = express();
 app.use(express.json());
@@ -18,6 +19,7 @@ app.use(cors({
 // Usar rutas
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/enemics', enemicsRoutes);
+app.use('/api/shops', shopRoutes);
 
 // Conectar a MongoDB
 conectarDB();

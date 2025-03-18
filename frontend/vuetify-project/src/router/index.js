@@ -14,7 +14,6 @@ const routes = [
     name: "LoginRegistro",
     component: LoginRegistro,
   },
-
   {
     path: "/admin",
     component: AdminDashboard,
@@ -26,12 +25,30 @@ const routes = [
       { path: "estadistica", name: "Estadistica", component: Estadistica },
       { path: "tienda", name: "Tienda", component: Tienda },
     ],
+    meta: {
+      requiresAuth: true, // Marcar rutas que requieren autenticación de administrador
+    },
   },
 ];
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+// Guard para verificar la autenticación antes de acceder a las rutas protegidas
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem("token");
+  const usuario = JSON.parse(localStorage.getItem("usuario"));
+
+  // Verificar si la ruta requiere autenticación y si el usuario no está autenticado
+  if (to.meta.requiresAuth) {
+    // Si no hay token o el usuario no es admin, redirigir al login
+    if (!token || !usuario || usuario.admin !== true) {
+      return next("/");
+    }
+  }
+  next(); // Permitir el acceso
 });
 
 export default router;
