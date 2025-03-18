@@ -9,11 +9,11 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
         price: {
-            type: DataTypes.DECIMAL(10, 2),
+            type: DataTypes.INTEGER,
             allowNull: false,
         },
         type: {
-            type: DataTypes.STRING(255),
+            type: DataTypes.ENUM('skin', 'weapon'),  // Aquí defines los valores permitidos
             allowNull: false,
         },
         image: {

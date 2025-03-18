@@ -60,7 +60,7 @@
           </v-card-title>
           <v-card-text>
             <v-text-field v-model="nuevoProducto.name" label="Nom" class="cyber-input" dark></v-text-field>
-            <v-text-field v-model="nuevoProducto.type" label="Tipus" class="cyber-input" dark></v-text-field>
+            <v-select v-model="nuevoProducto.type" :items="['skin', 'weapon']" label="Tipus" class="cyber-input" dark></v-select>
             <v-text-field v-model.number="nuevoProducto.price" label="Preu" type="number" class="cyber-input" dark></v-text-field>
             <v-text-field v-model="nuevoProducto.image" label="URL d'Imatge" class="cyber-input" dark></v-text-field>
           </v-card-text>
