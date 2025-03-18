@@ -3,7 +3,7 @@ const router = express.Router();
 const { Shop } = require('../models');
 const { v4: uuidv4 } = require('uuid');
 
-// Añadir al principio del archivo donde están las otras variables
+// Variable para el estado de mantenimiento
 let mantenimientoActivo = false;
 
 // Añadir este nuevo endpoint para controlar el modo mantenimiento
@@ -26,17 +26,18 @@ router.get('/mantenimiento', (req, res) => {
     res.json({ mantenimiento: mantenimientoActivo });
 });
 
-// Modificar el endpoint GET /shop para que responda según el estado de mantenimiento
+// Modificar el endpoint GET /shop para que permita acceso al admin durante mantenimiento
 router.get('/shop', async (req, res) => {
     try {
-        if (mantenimientoActivo && req.method === 'GET') {
-            return res.status(503).json({ 
+        // Comprobar si está en mantenimiento y el usuario NO es admin
+        if (mantenimientoActivo && (!req.headers.authorization || !isAdminToken(req.headers.authorization))) {
+            return res.status(503).json({
                 mensaje: 'Tienda en mantenimiento. Vuelva más tarde.',
                 mantenimiento: true
             });
         }
         
-        
+        // Si no está en mantenimiento o el usuario es admin, devolver productos
         const shops = await Shop.findAll();
         res.json(shops);
     } catch (error) {
@@ -45,9 +46,39 @@ router.get('/shop', async (req, res) => {
     }
 });
 
+// Función auxiliar para verificar si el token es de un administrador
+function isAdminToken(authHeader) {
+    try {
+        // Extraer el token del header (Bearer token)
+        const token = authHeader.split(' ')[1];
+        
+        // Aquí debes implementar la verificación del token para determinar si es un admin
+        // Esto dependerá de cómo tengas implementada tu autenticación
+        
+        // Por ejemplo, si usas JWT podrías hacer algo así:
+        // const decoded = jwt.verify(token, 'tu_secreto_jwt');
+        // return decoded && decoded.admin === true;
+        
+        // Como no tenemos el código de autenticación, supondremos que el token es válido
+        // y que el usuario es admin si hay un token presente
+        return token ? true : false;
+    } catch (error) {
+        console.error('Error verificando token de admin:', error);
+        return false;
+    }
+}
+
 // GET /shop/:id - Obtener un producto por ID
 router.get('/shop/:id', async (req, res) => {
     try {
+        // Comprobar si está en mantenimiento y el usuario NO es admin
+        if (mantenimientoActivo && (!req.headers.authorization || !isAdminToken(req.headers.authorization))) {
+            return res.status(503).json({
+                mensaje: 'Tienda en mantenimiento. Vuelva más tarde.',
+                mantenimiento: true
+            });
+        }
+        
         const shop = await Shop.findByPk(req.params.id);
         if (!shop) return res.status(404).json({ message: 'Producto no encontrado' });
         res.json(shop);

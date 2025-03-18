@@ -150,37 +150,39 @@ export default {
       }
     },
     async cargarProductos() {
-    this.loading = true;
-    this.error = null;
-    try {
-        const token = localStorage.getItem("token"); // Obtener el token del localStorage
-        const headers = {};
+  this.loading = true;
+  this.error = null;
+  try {
+    const token = localStorage.getItem("token"); // Obtener el token del localStorage
+    const headers = {
+      'Content-Type': 'application/json'
+    };
 
-        if (token) {
-            headers["Authorization"] = `Bearer ${token}`; // Incluir el token en el encabezado
-        }
-
-        const response = await fetch(`${import.meta.env.VITE_API_URL}api/shops/shop`, {
-            method: 'GET',
-            headers: headers
-        });
-
-        if (!response.ok) {
-            if (response.status === 503) {
-                const data = await response.json();
-                this.mantenimiento = data.mantenimiento;
-                return;
-            }
-            throw new Error(`Error ${response.status}: ${response.statusText}`);
-        }
-
-        this.productos = await response.json();
-    } catch (error) {
-        console.error('Error al cargar productos:', error);
-        this.error = 'No s\'han pogut carregar els productes. Si us plau, torneu-ho a provar més tard.';
-    } finally {
-        this.loading = false;
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`; // Incluir el token en el encabezado
     }
+
+    const response = await fetch(`${import.meta.env.VITE_API_URL}api/shops/shop`, {
+      method: 'GET',
+      headers: headers
+    });
+
+    if (!response.ok) {
+      if (response.status === 503) {
+        const data = await response.json();
+        this.mantenimiento = data.mantenimiento;
+        return;
+      }
+      throw new Error(`Error ${response.status}: ${response.statusText}`);
+    }
+
+    this.productos = await response.json();
+  } catch (error) {
+    console.error('Error al cargar productos:', error);
+    this.error = 'No s\'han pogut carregar els productes. Si us plau, torneu-ho a provar més tard.';
+  } finally {
+    this.loading = false;
+  }
 },
     abrirDialogo(index) {
       this.editandoIndex = index;
@@ -207,86 +209,99 @@ export default {
       this.dialogoAbierto = false;
       this.error = null;
     },
-    async guardarProducto() {
-      if (!this.nuevoProducto.name || !this.nuevoProducto.price || !this.nuevoProducto.type) {
-        this.error = 'Si us plau, omple tots els camps obligatoris.';
-        return;
-      }
-
-      this.loading = true;
-      this.error = null;
-
-      try {
-        // Creamos un objeto exactamente con los campos que espera la API
-        const productoData = {
-          name: this.nuevoProducto.name,
-          price: this.nuevoProducto.price,
-          type: this.nuevoProducto.type,
-          image: this.nuevoProducto.image
-        };
-
-        let response;
-        if (this.editandoIndex !== null) {
-          // Actualizar producto existente
-          response = await fetch(`${import.meta.env.VITE_API_URL}api/shops/update/${this.nuevoProducto.id}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(productoData)
-          });
-        } else {
-          // Crear nuevo producto
-          response = await fetch(`${import.meta.env.VITE_API_URL}api/shops/new`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(productoData)
-          });
-        }
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
-        }
-        
-        await this.cargarProductos(); // Recargar la lista después de guardar
-        this.cerrarDialogo();
-      } catch (error) {
-        console.error('Error al guardar el producto:', error);
-        this.error = error.message || 'No s\'ha pogut guardar el producte. Si us plau, torneu-ho a provar més tard.';
-      } finally {
-        this.loading = false;
-      }
-    },
-    async eliminarProducto(id) {
-      if (!confirm('Estàs segur que vols eliminar aquest producte?')) {
-        return;
-      }
-
-      this.loading = true;
-      this.error = null;
-
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}api/shops/delete/${id}`, {
-          method: 'DELETE'
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
-        }
-
-        await this.cargarProductos(); // Recargar la lista después de eliminar
-      } catch (error) {
-        console.error('Error al eliminar el producto:', error);
-        this.error = error.message || 'No s\'ha pogut eliminar el producte. Si us plau, torneu-ho a provar més tard.';
-      } finally {
-        this.loading = false;
-      }
-    }
+    // Update guardarProducto method to include the token
+async guardarProducto() {
+  if (!this.nuevoProducto.name || !this.nuevoProducto.price || !this.nuevoProducto.type) {
+    this.error = 'Si us plau, omple tots els camps obligatoris.';
+    return;
   }
+
+  this.loading = true;
+  this.error = null;
+
+  try {
+    const productoData = {
+      name: this.nuevoProducto.name,
+      price: this.nuevoProducto.price,
+      type: this.nuevoProducto.type,
+      image: this.nuevoProducto.image
+    };
+
+    const token = localStorage.getItem("token");
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    let response;
+    if (this.editandoIndex !== null) {
+      // Actualizar producto existente
+      response = await fetch(`${import.meta.env.VITE_API_URL}api/shops/update/${this.nuevoProducto.id}`, {
+        method: 'PUT',
+        headers: headers,
+        body: JSON.stringify(productoData)
+      });
+    } else {
+      // Crear nuevo producto
+      response = await fetch(`${import.meta.env.VITE_API_URL}api/shops/new`, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(productoData)
+      });
+    }
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
+    }
+    
+    await this.cargarProductos(); // Recargar la lista después de guardar
+    this.cerrarDialogo();
+  } catch (error) {
+    console.error('Error al guardar el producto:', error);
+    this.error = error.message || 'No s\'ha pogut guardar el producte. Si us plau, torneu-ho a provar més tard.';
+  } finally {
+    this.loading = false;
+  }
+},
+    // Update eliminarProducto method to include token
+async eliminarProducto(id) {
+  if (!confirm('Estàs segur que vols eliminar aquest producte?')) {
+    return;
+  }
+
+  this.loading = true;
+  this.error = null;
+
+  try {
+    const token = localStorage.getItem("token");
+    const headers = {};
+
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${import.meta.env.VITE_API_URL}api/shops/delete/${id}`, {
+      method: 'DELETE',
+      headers: headers
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
+    }
+
+    await this.cargarProductos(); // Recargar la lista después de eliminar
+  } catch (error) {
+    console.error('Error al eliminar el producto:', error);
+    this.error = error.message || 'No s\'ha pogut eliminar el producte. Si us plau, torneu-ho a provar més tard.';
+  } finally {
+    this.loading = false;
+  }
+}}
 };
 </script>
 

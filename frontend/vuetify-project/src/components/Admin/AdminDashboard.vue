@@ -5,6 +5,17 @@
       <v-app-bar-nav-icon color="#9C27B0" @click="drawer = !drawer"></v-app-bar-nav-icon>
       <v-toolbar-title class="cyberpunk-title">PANELL ADMINISTRATIU</v-toolbar-title>
       <v-spacer></v-spacer>
+      
+      <!-- Botón de logout -->
+      <v-btn
+        color="#9C27B0"
+        @click="logout"
+        class="logout-btn mr-2"
+        elevation="2"
+      >
+        <v-icon left>mdi-logout</v-icon>
+        LOGOUT
+      </v-btn>
     </v-app-bar>
 
     <!-- Menú lateral estilo cyberpunk -->
@@ -70,6 +81,16 @@ export default {
     return {
       drawer: true
     };
+  },
+  methods: {
+    logout() {
+      // Eliminar token del localStorage
+      localStorage.removeItem('token');
+      localStorage.removeItem('usuario');
+      
+      // Redirigir a la página de inicio o login
+      this.$router.push('/');
+    }
   }
 };
 </script>
@@ -77,8 +98,8 @@ export default {
 <style scoped>
 .cyber-background {
   background-color: #151C27;
-  background-image: linear-gradient(rgba(15, 25, 35, 0.9), rgba(15, 25, 35, 0.85)), 
-                    repeating-linear-gradient(90deg, rgba(0, 225, 255, 0.1) 0px, rgba(0, 225, 255, 0.1) 1px, transparent 1px, transparent 7px);
+  background-image: linear-gradient(rgba(15, 25, 35, 0.9), rgba(15, 25, 35, 0.85)),
+                     repeating-linear-gradient(90deg, rgba(0, 225, 255, 0.1) 0px, rgba(0, 225, 255, 0.1) 1px, transparent 1px, transparent 7px);
 }
 
 .cyberpunk-title {
@@ -118,5 +139,18 @@ export default {
 
 .v-list-item__icon {
   margin-right: 16px;
+}
+
+.logout-btn {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+  background-color: #7B1FA2 !important;
+  box-shadow: 0 0 10px rgba(156, 39, 176, 0.7);
 }
 </style>
