@@ -15,6 +15,7 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+app.use('/uploads/shop', express.static('uploads/shop'));
 
 // Usar rutas
 app.use('/api/usuarios', usuariosRoutes);

@@ -5,10 +5,13 @@ const { v4: uuidv4 } = require('uuid');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const app = express();
 
 // Define upload directory
 // Definir el directorio de subida
 const uploadDir = path.join(__dirname, '../uploads/shop');  // Aquí debería estar en una carpeta dentro del contenedor
+app.use('/uploads/shop', express.static(path.join(__dirname, '../uploads/shop')));
+console.log('Serving images from:', path.join(__dirname, '../uploads/shop'));
 
 
 // Verificar que el directorio exista
