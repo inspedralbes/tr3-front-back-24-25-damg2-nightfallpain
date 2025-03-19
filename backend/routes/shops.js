@@ -7,44 +7,43 @@ const path = require('path');
 const fs = require('fs');
 
 // Define upload directory
-const uploadDir = path.join(__dirname, '../../frontend/vuetify-project/public/uploads/shop');
+// Definir el directorio de subida
+const uploadDir = path.join(__dirname, '../uploads/shop');  // Aquí debería estar en una carpeta dentro del contenedor
 
-// Modifica esta línea para usar recursive: true
+
+// Verificar que el directorio exista
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
     console.log(`Created directory: ${uploadDir}`);
 }
 
-// Configure multer for file storage
+// Configurar multer para almacenamiento de archivos
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, uploadDir);
+        cb(null, uploadDir);  // Asegúrate de que la ruta sea correcta
     },
     filename: function (req, file, cb) {
-        // Create unique filename with original extension
+        // Crear nombre único para el archivo
         const uniqueFilename = `${Date.now()}-${uuidv4()}${path.extname(file.originalname)}`;
         cb(null, uniqueFilename);
     }
 });
 
-// File filter to only accept images
+// Filtrar archivos para que solo se acepten imágenes
 const fileFilter = (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/x-png'];
     if (allowedTypes.includes(file.mimetype)) {
         cb(null, true);
     } else {
         cb(new Error('Solo se permiten archivos de imagen (jpg, jpeg, png)'), false);
     }
 };
-
-// Initialize multer with our configurations
+// Inicializar multer con las configuraciones
 const upload = multer({ 
     storage: storage, 
     fileFilter: fileFilter,
-    limits: {
-        fileSize: 5 * 1024 * 1024 // 5MB limit
-    }
-});
+    limits: { fileSize: 5 * 1024 * 1024 } // Limitar tamaño del archivo a 5MB
+})
 
 // Variable para el estado de mantenimiento
 let mantenimientoActivo = false;
@@ -170,15 +169,14 @@ router.post('/new', upload.single('image'), async (req, res) => {
             return res.status(400).json({ message: 'Los campos nombre, precio y tipo son requeridos' });
         }
         
-        let imagePath = '';
+        let imageName = '';
         
-        // Si hay archivo de imagen, usar esa ruta
+        // Si hay archivo de imagen, usar ese nombre
         if (req.file) {
-            // Generar URL relativa para la imagen
-            imagePath = `/uploads/shop/${req.file.filename}`;
+            imageName = req.file.filename; // Solo guardamos el nombre del archivo
         } else if (imageUrl) {
             // Si no hay archivo pero sí URL, mantener la URL
-            imagePath = imageUrl;
+            imageName = imageUrl;
         }
         
         const shop = await Shop.create({ 
@@ -186,7 +184,7 @@ router.post('/new', upload.single('image'), async (req, res) => {
             name, 
             price, 
             type, 
-            image: imagePath 
+            image: imageName // Guardamos solo el nombre del archivo
         });
         
         res.status(201).json(shop);
@@ -201,7 +199,6 @@ router.post('/new', upload.single('image'), async (req, res) => {
         res.status(500).json({ message: 'Error al crear el producto' });
     }
 });
-
 // PUT /shop/:id - Actualizar un producto con imagen
 router.put('/update/:id', upload.single('image'), async (req, res) => {
     try {
@@ -216,25 +213,25 @@ router.put('/update/:id', upload.single('image'), async (req, res) => {
             return res.status(404).json({ message: 'Producto no encontrado' });
         }
         
-        let imagePath = shop.image; // Mantener la imagen actual por defecto
+        let imageName = shop.image; // Mantener la imagen actual por defecto
         
         // Si hay un nuevo archivo de imagen
         if (req.file) {
             // Eliminar la imagen anterior
             await deleteOldImage(req.params.id);
             
-            // Establecer la nueva ruta de imagen
-            imagePath = `/uploads/shop/${req.file.filename}`;
+            // Establecer el nuevo nombre de la imagen
+            imageName = req.file.filename; // Solo guardamos el nombre del archivo
         } else if (imageUrl && imageUrl !== shop.image) {
             // Si no hay archivo pero hay una nueva URL
-            imagePath = imageUrl;
+            imageName = imageUrl;
         }
         
         await shop.update({ 
             name: name || shop.name, 
             price: price || shop.price, 
             type: type || shop.type, 
-            image: imagePath 
+            image: imageName // Guardamos solo el nombre del archivo
         });
         
         res.json(shop);
@@ -249,7 +246,6 @@ router.put('/update/:id', upload.single('image'), async (req, res) => {
         res.status(500).json({ message: 'Error al actualizar el producto' });
     }
 });
-
 // DELETE /shop/:id - Eliminar un producto
 router.delete('/delete/:id', async (req, res) => {
     try {

@@ -33,12 +33,12 @@
         <v-col v-for="(producto, index) in productos" :key="producto.id" cols="12" sm="6" md="4">
           <v-card class="product-card">
             <v-img 
-  v-if="producto.image" 
-  :src="producto.image" 
-  height="200px" 
-  contain
-  @error="handleImageError"
-></v-img>
+                v-if="producto.image" 
+                :src="`${apiUrl}/uploads/shop/${producto.image}`" 
+                height="200px" 
+                contain
+                @error="handleImageError"
+              ></v-img>
             <v-card-title>{{ producto.name }}</v-card-title>
             <v-card-text>
               <p class="descripcion">{{ producto.type }}</p>
@@ -46,7 +46,7 @@
             </v-card-text>
             <v-card-actions>
               <v-btn class="neon-button-edit" small @click="abrirDialogo(index)">Editar</v-btn>
-              <v-btn class="neon-button-delete" small @click.native="mostrarDialogoEliminacion(producto)">Eliminar</v-btn>
+              <v-btn class="neon-button-delete" small @click="mostrarDialogoEliminacion(producto)">Eliminar</v-btn>
             </v-card-actions>
           </v-card>
         </v-col>
@@ -65,16 +65,16 @@
             
             <!-- Nuevo input para carga de imagen -->
             <v-file-input
-              v-model="imagenFile"
-              label="Seleccionar imatge"
-              accept="image/jpeg, image/png, image/jpg"
-              prepend-icon="mdi-camera"
-              show-size
-              truncate-length="15"
-              class="cyber-input"
-              dark
-              @change="handleImageChange"
-            ></v-file-input>
+            v-model="imagenFile"
+            label="Seleccionar imatge"
+            accept="image/jpeg, image/png, image/jpg"
+            prepend-icon="mdi-camera"
+            show-size
+            truncate-length="15"
+            class="cyber-input"
+            dark
+            @change="handleImageChange"
+          ></v-file-input>
             
             <!-- Previsualización de la imagen -->
             <div v-if="previewImage" class="text-center my-3">
@@ -157,7 +157,8 @@ export default {
       mantenimiento: false,
       adminSecret: localStorage.getItem("adminSecret") || "",  // Guardar clave secreta
       deleteDialog: false,
-      productoSeleccionado: null
+      productoSeleccionado: null,
+      apiUrl: import.meta.env.VITE_API_URL // Definir la URL base de la API
     };
   },
 
@@ -166,16 +167,20 @@ export default {
     this.cargarProductos();
   },
   methods: {
-    handleImageChange(file) {
-      if (!file) {
-        this.previewImage = null;
-        return;
-      }
-      
-      // Crear una URL para previsualizar la imagen
-      this.previewImage = URL.createObjectURL(file);
-    },
-    
+    methods: {
+  handleImageChange(file) {
+    if (file && file instanceof File) {
+      console.log("Archivo recibido:", file);
+      this.previewImage = URL.createObjectURL(file); // Previsualizar la imagen
+    } else {
+      console.error("El archivo no es válido");
+      this.previewImage = null;
+    }
+  },
+},
+
+
+
     removeImage() {
       this.imagenFile = null;
       this.previewImage = null;
@@ -298,11 +303,12 @@ export default {
     },
     cerrarDialogo() {
       this.dialogoAbierto = false;
-      this.previewImage = null;
       this.imagenFile = null;
+      this.previewImage = null;
+      this.editandoIndex = null;
     },
-    mostrarSnackbar(texto, color = 'info') {
-      this.snackbar.text = texto;
+    mostrarSnackbar(message, color) {
+      this.snackbar.text = message;
       this.snackbar.color = color;
       this.snackbar.show = true;
     },
@@ -325,21 +331,18 @@ export default {
         let response;
         let url;
         let method;
-        
-        // Utilizamos FormData para enviar datos multipart (imágenes + texto)
+
+        // Usamos FormData para enviar los datos incluyendo la imagen
         const formData = new FormData();
-        formData.append('name', this.nuevoProducto.name);
-        formData.append('price', this.nuevoProducto.price);
-        formData.append('type', this.nuevoProducto.type);
-        
-        // Si se seleccionó una nueva imagen, la agregamos al FormData
-        if (this.imagenFile) {
-          formData.append('image', this.imagenFile);
-        } else if (this.nuevoProducto.image) {
-          // Si no hay nueva imagen pero hay una URL de imagen existente
-          formData.append('imageUrl', this.nuevoProducto.image);
-        }
-        
+          formData.append('name', this.nuevoProducto.name);
+          formData.append('price', this.nuevoProducto.price);
+          formData.append('type', this.nuevoProducto.type);
+
+          if (this.imagenFile) {
+            formData.append('image', this.imagenFile);
+          } else if (this.nuevoProducto.image) {
+            formData.append('imageUrl', this.nuevoProducto.image);
+          }
         if (this.editandoIndex !== null) {
           // Actualizar producto existente
           url = `${import.meta.env.VITE_API_URL}api/shops/update/${this.nuevoProducto.id}`;
@@ -349,7 +352,7 @@ export default {
           url = `${import.meta.env.VITE_API_URL}api/shops/new`;
           method = 'POST';
         }
-        
+
         response = await fetch(url, {
           method: method,
           headers: headers,
@@ -360,7 +363,7 @@ export default {
           const errorData = await response.json().catch(() => ({}));
           throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
         }
-        
+
         await this.cargarProductos(); // Recargar la lista después de guardar
         this.cerrarDialogo();
         this.mostrarSnackbar(
@@ -377,163 +380,68 @@ export default {
         this.loading = false;
       }
     },
-    handleImageError(e) {
-      console.error('Error cargando imagen:', e);
-      // O de forma más segura:
-      if (e && e.target) {
-        console.error('Error cargando imagen:', e.target.src);
-      } else {
-        console.error('Error cargando imagen, evento no válido');
-      }
-    },
-    mostrarDialogoEliminacion(producto) {
-      this.productoSeleccionado = producto;
-      this.deleteDialog = true;
-    },
-    async confirmarEliminacion() {
-      if (!this.productoSeleccionado) return;
-      
-      this.loading = true;
-      this.deleteDialog = false;
-
-      try {
-        const token = localStorage.getItem("token");
-        const headers = {};
-
-        if (token) {
-          headers["Authorization"] = `Bearer ${token}`;
-        }
-
-        const response = await fetch(`${import.meta.env.VITE_API_URL}api/shops/delete/${this.productoSeleccionado.id}`, {
-          method: 'DELETE',
-          headers: headers
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
-        }
-
-        await this.cargarProductos(); // Recargar la lista después de eliminar
-        this.mostrarSnackbar('Producte eliminat correctament.', 'success');
-      } catch (error) {
-        console.error('Error al eliminar el producto:', error);
-        this.mostrarSnackbar(
-          error.message || 'No s\'ha pogut eliminar el producte. Si us plau, torneu-ho a provar més tard.',
-          'error'
-        );
-      } finally {
-        this.loading = false;
-        this.productoSeleccionado = null;
-      }
+    methods: {
+  handleImageError(event) {
+    if (event.target) {
+      event.target.src = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSfTkAp83ZpIMkZ_JeyRg96ciMAH-kMdVPGHw&s'; // URL de imagen predeterminada
+    } else {
+      console.error('El objetivo del evento no está definido.');
     }
+  },
+}
   }
 };
 </script>
 
 <style scoped>
-.cyber-background {
-  background-color: #151C27;
-  min-height: 100vh;
-}
-
 .cyber-card {
-  background-color: #1E2633;
-  border: 1px solid rgba(156, 39, 176, 0.3);
-  color: white;
-  padding: 20px;
-  margin-bottom: 20px;
-}
-
-.neon-text {
-  color: #9C27B0;
-  text-shadow: 0 0 5px #9C27B0, 0 0 10px #9C27B0;
-}
-
-.header-row {
-  display: flex;
-  align-items: center;
-}
-
-.text-right {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.neon-button {
-  background: #9C27B0;
-  color: white;
-  box-shadow: 0 0 10px #9C27B0;
-}
-
-.neon-button-maintenance {
-  background: #ff9800;
-  color: white;
-  box-shadow: 0 0 10px #ff9800;
-}
-
-.neon-button-maintenance-active {
-  background: #ff5722;
-  color: white;
-  box-shadow: 0 0 10px #ff5722;
-}
-
-.maintenance-alert {
-  background-color: rgba(255, 152, 0, 0.2) !important;
-  border: 1px solid #ff9800;
-  color: #ff9800;
-}
-
-.neon-button-cancel {
-  color: #9C27B0;
-  text-shadow: 0 0 5px #9C27B0;
-}
-
-.neon-button-edit {
-  background: #ff9800;
-  color: white;
-  box-shadow: 0 0 10px #ff9800;
-}
-
-.neon-button-delete {
-  background: #ff2c2c;
-  color: white;
-  box-shadow: 0 0 10px #ff2c2c;
-}
-
-.cyber-input >>> .v-input__control {
-  background-color: #252d3d !important;
-  border: 1px solid rgba(156, 39, 176, 0.5);
-  color: white;
+  background-color: #121212;
+  color: #ffffff;
+  border-radius: 15px;
 }
 
 .product-card {
-  background-color: #1E2633 !important;
-  color: white !important;
-  border: 1px solid rgba(156, 39, 176, 0.3);
-  box-shadow: 0 0 10px rgba(156, 39, 176, 0.5);
-  transition: transform 0.3s ease;
+  background-color: #212121;
+  border-radius: 10px;
 }
 
-.product-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 0 15px rgba(156, 39, 176, 0.8);
+.ciber-input input {
+  background-color: #121212;
+  color: #ffffff;
 }
 
-.descripcion {
-  color: #b16bc9;
-  font-size: 0.9em;
+.neon-text {
+  color: #00ffcc;
 }
 
-.precio {
-  color: #d5a6e6;
-  font-size: 1.1em;
+.neon-button {
+  background-color: #00ffcc;
+  color: #212121;
+  border-radius: 5px;
+  font-weight: bold;
+  padding: 10px;
+}
+
+.neon-button-edit {
+  background-color: #00ffcc;
+  color: #212121;
+}
+
+.neon-button-delete {
+  background-color: #f44336;
+  color: #ffffff;
   font-weight: bold;
 }
 
 .preview-image {
-  border: 2px solid rgba(156, 39, 176, 0.5);
-  border-radius: 4px;
-  max-width: 100%;
+  border-radius: 10px;
+}
+
+.maintenance-alert {
+  font-size: 16px;
+}
+
+.header-row {
+  background-color: #121212;
 }
 </style>
