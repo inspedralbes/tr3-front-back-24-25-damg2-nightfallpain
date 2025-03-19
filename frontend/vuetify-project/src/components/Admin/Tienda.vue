@@ -24,21 +24,21 @@
         <strong>⚠️ Botiga en manteniment ⚠️</strong>
       </v-alert>
 
-
       <!-- Loading Spinner -->
       <div v-if="loading" class="text-center my-4">
         <v-progress-circular indeterminate color="#9C27B0" size="50"></v-progress-circular>
       </div>
 
-      <!-- Error Message -->
-      <v-alert v-if="error" type="error" class="mb-4">
-        {{ error }}
-      </v-alert>
-
       <v-row>
         <v-col v-for="(producto, index) in productos" :key="producto.id" cols="12" sm="6" md="4">
           <v-card class="product-card">
-            <v-img v-if="producto.image" :src="producto.image" height="200px" contain></v-img>
+            <v-img 
+  v-if="producto.image" 
+  :src="producto.image" 
+  height="200px" 
+  contain
+  @error="handleImageError"
+></v-img>
             <v-card-title>{{ producto.name }}</v-card-title>
             <v-card-text>
               <p class="descripcion">{{ producto.type }}</p>
@@ -46,7 +46,7 @@
             </v-card-text>
             <v-card-actions>
               <v-btn class="neon-button-edit" small @click="abrirDialogo(index)">Editar</v-btn>
-              <v-btn class="neon-button-delete" small @click="eliminarProducto(producto.id)">Eliminar</v-btn>
+              <v-btn class="neon-button-delete" small @click.native="mostrarDialogoEliminacion(producto)">Eliminar</v-btn>
             </v-card-actions>
           </v-card>
         </v-col>
@@ -62,7 +62,30 @@
             <v-text-field v-model="nuevoProducto.name" label="Nom" class="cyber-input" dark></v-text-field>
             <v-select v-model="nuevoProducto.type" :items="['skin', 'weapon']" label="Tipus" class="cyber-input" dark></v-select>
             <v-text-field v-model.number="nuevoProducto.price" label="Preu" type="number" class="cyber-input" dark></v-text-field>
-            <v-text-field v-model="nuevoProducto.image" label="URL d'Imatge" class="cyber-input" dark></v-text-field>
+            
+            <!-- Nuevo input para carga de imagen -->
+            <v-file-input
+              v-model="imagenFile"
+              label="Seleccionar imatge"
+              accept="image/jpeg, image/png, image/jpg"
+              prepend-icon="mdi-camera"
+              show-size
+              truncate-length="15"
+              class="cyber-input"
+              dark
+              @change="handleImageChange"
+            ></v-file-input>
+            
+            <!-- Previsualización de la imagen -->
+            <div v-if="previewImage" class="text-center my-3">
+              <img :src="previewImage" height="150" class="preview-image" />
+              <div class="mt-2">
+                <v-btn small text color="error" @click="removeImage">Eliminar imatge</v-btn>
+              </div>
+            </div>
+            
+            <!-- Campo oculto para URL de imagen actual -->
+            <v-text-field v-if="!imagenFile" v-model="nuevoProducto.image" label="URL d'Imatge actual" class="cyber-input" dark disabled></v-text-field>
           </v-card-text>
           <v-card-actions>
             <v-btn class="neon-button-cancel" text @click="cerrarDialogo">Cancelar</v-btn>
@@ -73,6 +96,43 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+
+      <!-- Diálogo de confirmación de eliminación -->
+      <v-dialog v-model="deleteDialog" max-width="400">
+        <v-card class="cyber-card">
+          <v-card-title class="neon-text">
+            <v-icon left color="error">mdi-alert</v-icon>
+            Confirmar eliminació
+          </v-card-title>
+          <v-card-text class="neon-text">
+            ¿Estàs segur que vols eliminar a {{ productoSeleccionado?.name }}?
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn text @click="deleteDialog = false" class="neon-button-cancel">Cancelar</v-btn>
+            <v-btn class="neon-button-delete" @click="confirmarEliminacion">Eliminar</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+      <!-- Snackbar para mensajes de estado -->
+      <v-snackbar
+        v-model="snackbar.show"
+        :color="snackbar.color"
+        timeout="3000"
+        bottom
+      >
+        {{ snackbar.text }}
+        <template v-slot:action="{ attrs }">
+          <v-btn
+            text
+            v-bind="attrs"
+            @click="snackbar.show = false"
+          >
+            Tancar
+          </v-btn>
+        </template>
+      </v-snackbar>
     </v-container>
   </div>
 </template>
@@ -81,23 +141,52 @@
 export default {
   name: "Tienda",
   data() {
-  return {
-    productos: [],
-    dialogoAbierto: false,
-    editandoIndex: null,
-    nuevoProducto: { name: "", type: "", price: 0, image: "" },
-    loading: false,
-    error: null,
-    mantenimiento: false,
-    adminSecret: localStorage.getItem("adminSecret") || ""  // Guardar clave secreta
-  };
-},
+    return {
+      productos: [],
+      dialogoAbierto: false,
+      editandoIndex: null,
+      nuevoProducto: { name: "", type: "", price: 0, image: "" },
+      imagenFile: null,
+      previewImage: null,
+      loading: false,
+      snackbar: {
+        show: false,
+        text: "",
+        color: "info"
+      },
+      mantenimiento: false,
+      adminSecret: localStorage.getItem("adminSecret") || "",  // Guardar clave secreta
+      deleteDialog: false,
+      productoSeleccionado: null
+    };
+  },
 
   created() {
     this.verificarEstadoMantenimiento();
     this.cargarProductos();
   },
   methods: {
+    handleImageChange(file) {
+      if (!file) {
+        this.previewImage = null;
+        return;
+      }
+      
+      // Crear una URL para previsualizar la imagen
+      this.previewImage = URL.createObjectURL(file);
+    },
+    
+    removeImage() {
+      this.imagenFile = null;
+      this.previewImage = null;
+      // Si estamos editando, mantener la URL existente
+      if (this.editandoIndex !== null) {
+        this.nuevoProducto.image = this.productos[this.editandoIndex].image;
+      } else {
+        this.nuevoProducto.image = "";
+      }
+    },
+    
     async verificarEstadoMantenimiento() {
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}api/shops/mantenimiento`);
@@ -123,69 +212,66 @@ export default {
         if (response.ok) {
           const data = await response.json();
           this.mantenimiento = data.mantenimiento;
-          this.error = null;
           
-          // Mostrar mensaje temporal
-          this.$nextTick(() => {
-            this.error = `La tienda ahora está ${this.mantenimiento ? 'en mantenimiento' : 'activa'}.`;
-            setTimeout(() => {
-              if (this.error === `La tienda ahora está ${this.mantenimiento ? 'en mantenimiento' : 'activa'}.`) {
-                this.error = null;
-              }
-            }, 3000);
-          });
+          // Mostrar mensaje con snackbar
+          this.mostrarSnackbar(
+            `La botiga ara està ${this.mantenimiento ? 'en manteniment' : 'activa'}.`,
+            this.mantenimiento ? 'warning' : 'success'
+          );
           
           // Recargar productos si se desactiva el mantenimiento
           if (!this.mantenimiento) {
             await this.cargarProductos();
           }
         } else {
-          throw new Error('No se pudo cambiar el modo de mantenimiento');
+          throw new Error('No es va poder canviar el mode de manteniment');
         }
       } catch (error) {
         console.error('Error al cambiar modo mantenimiento:', error);
-        this.error = 'Error al cambiar el modo de mantenimiento';
+        this.mostrarSnackbar('Error al canviar el mode de manteniment', 'error');
       } finally {
         this.loading = false;
       }
     },
     async cargarProductos() {
-  this.loading = true;
-  this.error = null;
-  try {
-    const token = localStorage.getItem("token"); // Obtener el token del localStorage
-    const headers = {
-      'Content-Type': 'application/json'
-    };
+      this.loading = true;
+      try {
+        const token = localStorage.getItem("token"); // Obtener el token del localStorage
+        const headers = {
+          'Content-Type': 'application/json'
+        };
 
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`; // Incluir el token en el encabezado
-    }
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`; // Incluir el token en el encabezado
+        }
 
-    const response = await fetch(`${import.meta.env.VITE_API_URL}api/shops/shop`, {
-      method: 'GET',
-      headers: headers
-    });
+        const response = await fetch(`${import.meta.env.VITE_API_URL}api/shops/shop`, {
+          method: 'GET',
+          headers: headers
+        });
 
-    if (!response.ok) {
-      if (response.status === 503) {
-        const data = await response.json();
-        this.mantenimiento = data.mantenimiento;
-        return;
+        if (!response.ok) {
+          if (response.status === 503) {
+            const data = await response.json();
+            this.mantenimiento = data.mantenimiento;
+            return;
+          }
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+
+        this.productos = await response.json();
+      } catch (error) {
+        console.error('Error al cargar productos:', error);
+        this.mostrarSnackbar('No s\'han pogut carregar els productes. Si us plau, torneu-ho a provar més tard.', 'error');
+      } finally {
+        this.loading = false;
       }
-      throw new Error(`Error ${response.status}: ${response.statusText}`);
-    }
-
-    this.productos = await response.json();
-  } catch (error) {
-    console.error('Error al cargar productos:', error);
-    this.error = 'No s\'han pogut carregar els productes. Si us plau, torneu-ho a provar més tard.';
-  } finally {
-    this.loading = false;
-  }
-},
+    },
     abrirDialogo(index) {
       this.editandoIndex = index;
+      this.imagenFile = null;
+      this.previewImage = null;
+      
       if (index !== null) {
         // Solo copiamos los campos exactos que necesitamos
         this.nuevoProducto = {
@@ -195,6 +281,11 @@ export default {
           price: this.productos[index].price,
           image: this.productos[index].image
         };
+        
+        // Si hay una imagen existente, mostrarla en la previsualización
+        if (this.nuevoProducto.image) {
+          this.previewImage = this.nuevoProducto.image;
+        }
       } else {
         this.nuevoProducto = { 
           name: "", 
@@ -207,101 +298,136 @@ export default {
     },
     cerrarDialogo() {
       this.dialogoAbierto = false;
-      this.error = null;
+      this.previewImage = null;
+      this.imagenFile = null;
     },
-    // Update guardarProducto method to include the token
-async guardarProducto() {
-  if (!this.nuevoProducto.name || !this.nuevoProducto.price || !this.nuevoProducto.type) {
-    this.error = 'Si us plau, omple tots els camps obligatoris.';
-    return;
+    mostrarSnackbar(texto, color = 'info') {
+      this.snackbar.text = texto;
+      this.snackbar.color = color;
+      this.snackbar.show = true;
+    },
+    async guardarProducto() {
+      if (!this.nuevoProducto.name || !this.nuevoProducto.price || !this.nuevoProducto.type) {
+        this.mostrarSnackbar('Si us plau, omple tots els camps obligatoris.', 'warning');
+        return;
+      }
+
+      this.loading = true;
+
+      try {
+        const token = localStorage.getItem("token");
+        const headers = {};
+
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+
+        let response;
+        let url;
+        let method;
+        
+        // Utilizamos FormData para enviar datos multipart (imágenes + texto)
+        const formData = new FormData();
+        formData.append('name', this.nuevoProducto.name);
+        formData.append('price', this.nuevoProducto.price);
+        formData.append('type', this.nuevoProducto.type);
+        
+        // Si se seleccionó una nueva imagen, la agregamos al FormData
+        if (this.imagenFile) {
+          formData.append('image', this.imagenFile);
+        } else if (this.nuevoProducto.image) {
+          // Si no hay nueva imagen pero hay una URL de imagen existente
+          formData.append('imageUrl', this.nuevoProducto.image);
+        }
+        
+        if (this.editandoIndex !== null) {
+          // Actualizar producto existente
+          url = `${import.meta.env.VITE_API_URL}api/shops/update/${this.nuevoProducto.id}`;
+          method = 'PUT';
+        } else {
+          // Crear nuevo producto
+          url = `${import.meta.env.VITE_API_URL}api/shops/new`;
+          method = 'POST';
+        }
+        
+        response = await fetch(url, {
+          method: method,
+          headers: headers,
+          body: formData
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
+        }
+        
+        await this.cargarProductos(); // Recargar la lista después de guardar
+        this.cerrarDialogo();
+        this.mostrarSnackbar(
+          this.editandoIndex !== null ? 'Producte actualitzat correctament.' : 'Producte creat correctament.',
+          'success'
+        );
+      } catch (error) {
+        console.error('Error al guardar el producto:', error);
+        this.mostrarSnackbar(
+          error.message || 'No s\'ha pogut guardar el producte. Si us plau, torneu-ho a provar més tard.',
+          'error'
+        );
+      } finally {
+        this.loading = false;
+      }
+    },
+    handleImageError(e) {
+      console.error('Error cargando imagen:', e);
+      // O de forma más segura:
+      if (e && e.target) {
+        console.error('Error cargando imagen:', e.target.src);
+      } else {
+        console.error('Error cargando imagen, evento no válido');
+      }
+    },
+    mostrarDialogoEliminacion(producto) {
+      this.productoSeleccionado = producto;
+      this.deleteDialog = true;
+    },
+    async confirmarEliminacion() {
+      if (!this.productoSeleccionado) return;
+      
+      this.loading = true;
+      this.deleteDialog = false;
+
+      try {
+        const token = localStorage.getItem("token");
+        const headers = {};
+
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${import.meta.env.VITE_API_URL}api/shops/delete/${this.productoSeleccionado.id}`, {
+          method: 'DELETE',
+          headers: headers
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
+        }
+
+        await this.cargarProductos(); // Recargar la lista después de eliminar
+        this.mostrarSnackbar('Producte eliminat correctament.', 'success');
+      } catch (error) {
+        console.error('Error al eliminar el producto:', error);
+        this.mostrarSnackbar(
+          error.message || 'No s\'ha pogut eliminar el producte. Si us plau, torneu-ho a provar més tard.',
+          'error'
+        );
+      } finally {
+        this.loading = false;
+        this.productoSeleccionado = null;
+      }
+    }
   }
-
-  this.loading = true;
-  this.error = null;
-
-  try {
-    const productoData = {
-      name: this.nuevoProducto.name,
-      price: this.nuevoProducto.price,
-      type: this.nuevoProducto.type,
-      image: this.nuevoProducto.image
-    };
-
-    const token = localStorage.getItem("token");
-    const headers = {
-      'Content-Type': 'application/json'
-    };
-
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-
-    let response;
-    if (this.editandoIndex !== null) {
-      // Actualizar producto existente
-      response = await fetch(`${import.meta.env.VITE_API_URL}api/shops/update/${this.nuevoProducto.id}`, {
-        method: 'PUT',
-        headers: headers,
-        body: JSON.stringify(productoData)
-      });
-    } else {
-      // Crear nuevo producto
-      response = await fetch(`${import.meta.env.VITE_API_URL}api/shops/new`, {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(productoData)
-      });
-    }
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
-    }
-    
-    await this.cargarProductos(); // Recargar la lista después de guardar
-    this.cerrarDialogo();
-  } catch (error) {
-    console.error('Error al guardar el producto:', error);
-    this.error = error.message || 'No s\'ha pogut guardar el producte. Si us plau, torneu-ho a provar més tard.';
-  } finally {
-    this.loading = false;
-  }
-},
-    // Update eliminarProducto method to include token
-async eliminarProducto(id) {
-  if (!confirm('Estàs segur que vols eliminar aquest producte?')) {
-    return;
-  }
-
-  this.loading = true;
-  this.error = null;
-
-  try {
-    const token = localStorage.getItem("token");
-    const headers = {};
-
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-
-    const response = await fetch(`${import.meta.env.VITE_API_URL}api/shops/delete/${id}`, {
-      method: 'DELETE',
-      headers: headers
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
-    }
-
-    await this.cargarProductos(); // Recargar la lista después de eliminar
-  } catch (error) {
-    console.error('Error al eliminar el producto:', error);
-    this.error = error.message || 'No s\'ha pogut eliminar el producte. Si us plau, torneu-ho a provar més tard.';
-  } finally {
-    this.loading = false;
-  }
-}}
 };
 </script>
 
@@ -403,5 +529,11 @@ async eliminarProducto(id) {
   color: #d5a6e6;
   font-size: 1.1em;
   font-weight: bold;
+}
+
+.preview-image {
+  border: 2px solid rgba(156, 39, 176, 0.5);
+  border-radius: 4px;
+  max-width: 100%;
 }
 </style>
