@@ -10,6 +10,17 @@ router.post("/register", async (req, res) => {
     try {
         const { name, email, password, speed, health, damage, arma, shop } = req.body;
 
+        // Validar que los campos obligatorios estén presentes
+        if (!name || !email || !password) {
+            return res.status(400).json({ error: "Todos los campos son obligatorios (nombre, email y contraseña)" });
+        }
+
+        // Validar formato de email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ error: "El correo no tiene un formato válido" });
+        }
+
         // Verificar si el usuario ya existe
         const existingUser = await UsuarisJugadors.findOne({ where: { email } });
         if (existingUser) {
@@ -37,6 +48,7 @@ router.post("/register", async (req, res) => {
         res.status(500).json({ error: "Error al registrar el usuario", details: error.message });
     }
 });
+
 
 // 📌 INICIAR SESIÓN (sin JWT)
 const jwt = require('jsonwebtoken');
