@@ -11,6 +11,39 @@ router.get('/all', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+router.get('/game/all', async (req, res) => {
+    try {
+        const enemics = await Enemics.findAll();
+
+        // Convertimos los datos y añadimos bulletName según el name
+        const enemies = enemics.map(enemy => {
+            return {
+                name: enemy.name,
+                health: enemy.health,
+                speed: enemy.speed,
+                damage: enemy.damage,
+                bulletName: getBulletName(enemy.name) // Asignamos el bulletName aquí
+            };
+        });
+
+        res.status(200).json({ enemies }); // Enviamos como un objeto con una lista "enemies"
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Función para asignar bulletName según el nombre del enemigo
+function getBulletName(enemyName) {
+    switch (enemyName) {
+        case "Enemy":
+            return "bulletEnemy";
+        case "EnemyUzi":
+            return "bulletEnemyUzi";
+        default:
+            return "bullet"; // Valor por defecto
+    }
+}
+
 
 // Actualizar la vida, daño o velocidad de un enemigo específico
 router.put('/update/:id', async (req, res) => {
