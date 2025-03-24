@@ -104,7 +104,7 @@
                     v-model.number="enemigoSeleccionado.damage"
                     color="#ff9800"
                     min="0"
-                    max="100"
+                    max="50"
                     hide-details
                     class="neon-slider"
                   ></v-slider>
@@ -123,7 +123,7 @@
                     v-model.number="enemigoSeleccionado.speed"
                     color="#2196f3"
                     min="0"
-                    max="100"
+                    max="5"
                     hide-details
                     class="neon-slider"
                   ></v-slider>
