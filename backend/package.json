@@ -18,6 +18,8 @@
     "mysql2": "^3.13.0",
     "node-modules": "^1.0.1",
     "sequelize": "^6.37.6",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
     "vuetify": "^3.7.0-beta.1"
   },
   "author": "",

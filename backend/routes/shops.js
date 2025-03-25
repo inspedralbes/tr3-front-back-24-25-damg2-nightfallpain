@@ -189,7 +189,8 @@ router.post('/new', upload.single('image'), async (req, res) => {
             type, 
             image: imageName // Guardamos solo el nombre del archivo
         });
-        
+        const io = req.io;
+        io.emit('newProduct', shop);
         res.status(201).json(shop);
     } catch (error) {
         console.error(error);
@@ -236,7 +237,8 @@ router.put('/update/:id', upload.single('image'), async (req, res) => {
             type: type || shop.type, 
             image: imageName // Guardamos solo el nombre del archivo
         });
-        
+        const io = req.io;
+        io.emit('updateProduct', shop);
         res.json(shop);
     } catch (error) {
         console.error(error);
@@ -260,6 +262,10 @@ router.delete('/delete/:id', async (req, res) => {
         
         // Eliminar el producto
         await shop.destroy();
+        
+        // Emitir evento de socket para producto eliminado
+        const io = req.io;
+        io.emit('deleteProduct', { id: req.params.id });
         
         res.json({ message: 'Producto eliminado correctamente' });
     } catch (error) {
