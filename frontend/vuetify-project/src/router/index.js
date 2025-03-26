@@ -54,11 +54,8 @@ router.beforeEach(async (to, from, next) => {
       const data = await response.json();
 
       if (data.maintenance) {
-        // Opción 1: Redirigir a página de mantenimiento
-        return next({ name: 'Manteniment' });
-
-        // Opción 2: Si prefieres mostrar un mensaje de error más específico
-        // return next(new Error('Servicio de usuarios en mantenimiento'));
+        
+         return next(new Error('Servicio de usuarios en mantenimiento'));
       }
     } catch (error) {
       console.error("Error al verificar estado de mantenimiento:", error);
