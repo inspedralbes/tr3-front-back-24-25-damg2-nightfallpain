@@ -27,7 +27,7 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-app.use('/uploads/shop', express.static('uploads/shop'));
+app.use('/uploads/shop', express.static('/var/back/uploads/shop'));
 
 // Usar rutas
 app.use('/api/usuarios', usuariosRoutes);
@@ -56,7 +56,8 @@ sequelize.authenticate()
 
 // Iniciar servidor
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, "0.0.0.0", () => console.log(`🚀 Servidor corriendo en el puerto ${PORT}`));
+server.listen(PORT, "0.0.0.0", () => console.log(`🚀 Servidor corriendo en el puerto ${PORT}`));
+
 
 
 module.exports = { io }; // Exportar para uso en otras partes si es necesario
