@@ -5,6 +5,35 @@ const { UsuarisJugadors } = require('../models');
 
 const router = express.Router();
 
+// Estado de mantenimiento para usuarios
+let usuariosMaintenanceMode = false;
+
+// Middleware de mantenimiento para usuarios
+const usuariosMaintenanceMiddleware = (req, res, next) => {
+    if (usuariosMaintenanceMode) {
+        return res.status(503).json({ 
+            message: 'Servicio de usuarios en mantenimiento', 
+            maintenance: true 
+        });
+    }
+    next();
+};
+
+// Rutas de control de mantenimiento
+router.post('/maintenance/toggle', (req, res) => {
+    usuariosMaintenanceMode = !usuariosMaintenanceMode;
+    res.json({ 
+        message: `Modo mantenimiento usuarios ${usuariosMaintenanceMode ? 'activado' : 'desactivado'}`, 
+        maintenance: usuariosMaintenanceMode 
+    });
+});
+
+router.get('/maintenance/status', (req, res) => {
+    res.json({ maintenance: usuariosMaintenanceMode });
+});
+
+// Aplicar middleware de mantenimiento a todas las rutas de usuarios
+router.use(usuariosMaintenanceMiddleware);
 // 📌 REGISTRAR USUARIO
 router.post("/register", async (req, res) => {
     try {

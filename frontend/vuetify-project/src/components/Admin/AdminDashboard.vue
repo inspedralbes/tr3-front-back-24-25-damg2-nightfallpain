@@ -62,6 +62,12 @@
           </v-list-item-icon>
           <v-list-item-title class="cyber-text">BOTIGA</v-list-item-title>
         </v-list-item>
+        <v-list-item to="/admin/manteniment" link class="cyber-item mb-2">
+          <v-list-item-icon>
+            <v-icon color="#9C27B0">mdi-store</v-icon>
+          </v-list-item-icon>
+          <v-list-item-title class="cyber-text">MANTENIMENT</v-list-item-title>
+        </v-list-item>
       </v-list>
     </v-navigation-drawer>
 
