@@ -26,6 +26,7 @@
       </v-card>
     </v-dialog>
   </v-container>
+
   <v-snackbar v-model="snackbar.visible" :timeout="3000" color="error" multi-line>
     {{ snackbar.message }}
   </v-snackbar>
@@ -37,8 +38,12 @@ export default {
     return {
       maintenanceModalVisible: false,
       services: [
-        { name: 'Usuarios', endpoint: 'usuarios', maintenance: false },
-        
+        { name: 'Usuaris', endpoint: 'usuarios', maintenance: false },
+        { name: 'Enemics', endpoint: 'enemics', maintenance: false },
+        { name: 'Armes', endpoint: 'armes', maintenance: false },
+        { name: 'Partides', endpoint: 'partida', maintenance: false },
+        { name: 'Estadístiques', endpoint: 'estadistiques', maintenance: false },
+        { name: 'Botiga', endpoint: 'shops', maintenance: false }
       ],
       snackbar: {
         visible: false,

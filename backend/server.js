@@ -8,12 +8,15 @@ const { sequelize } = require('./models');
 const usuariosRoutes = require('./routes/usuarisJugadors');
 const enemicsRoutes = require('./routes/enemics');
 const shopRoutes = require('./routes/shops');
+const weaponRoutes = require('./routes/armes');
+const partidaRoutes = require('./routes/partida');
+const estadistiquesRoutes = require('./routes/estadistiques');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: '*', // Ajusta esto a tu dominio específico en producción
+        origin: '*',
         methods: ['GET', 'POST', 'PUT', 'DELETE']
     }
 });
@@ -30,6 +33,9 @@ app.use(cors({
 app.use('/uploads/shop', express.static('/var/back/uploads/shop'));
 
 // Usar rutas
+app.use('/api/estadistiques', estadistiquesRoutes);
+app.use('/api/armes', weaponRoutes);
+app.use('/api/partida', partidaRoutes);
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/enemics', enemicsRoutes);
 app.use('/api/shops', (req, res, next) => {
@@ -37,7 +43,7 @@ app.use('/api/shops', (req, res, next) => {
     next();
 }, shopRoutes);
 
-// Conexión de Socket
+// Conexión de Socket.IO
 io.on('connection', (socket) => {
     console.log('Cliente conectado via Socket');
 
@@ -58,6 +64,4 @@ sequelize.authenticate()
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, "0.0.0.0", () => console.log(`🚀 Servidor corriendo en el puerto ${PORT}`));
 
-
-
-module.exports = { io }; // Exportar para uso en otras partes si es necesario
+module.exports = { io }; // Exportar `io` para usarlo en las rutas

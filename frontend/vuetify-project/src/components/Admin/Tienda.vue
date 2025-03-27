@@ -178,7 +178,7 @@ export default {
   methods: {
     initSocket() {
       // Conectar al socket (ajusta la URL de tu backend)
-      this.socket = io('http://187.33.145.98:3000');
+      this.socket = io(import.meta.env.VITE_API_URL);
 
       // Escuchar evento de nuevo producto
       this.socket.on('newProduct', (producto) => {

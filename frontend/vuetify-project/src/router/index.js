@@ -19,24 +19,15 @@ const routes = [
     path: "/admin",
     component: AdminDashboard,
     children: [
-      { 
-        path: "usuarios", 
-        name: "Usuarios", 
-        component: Usuarios,
-        meta: {
-          requiresMaintenance: true // Añadimos meta para control de mantenimiento
-        }
-      },
-      { path: "enemigos", name: "Enemigos", component: Enemigos },
-      { path: "armas", name: "Armas", component: Armas },
-      { path: "partida", name: "Partida", component: Partida },
-      { path: "estadistica", name: "Estadistica", component: Estadistica },
-      { path: "tienda", name: "Tienda", component: Tienda },
+      { path: "usuarios", name: "Usuarios", component: Usuarios, meta: { requiresMaintenance: "usuarios" } },
+      { path: "enemigos", name: "Enemigos", component: Enemigos, meta: { requiresMaintenance: "enemics" } },
+      { path: "armas", name: "Armas", component: Armas, meta: { requiresMaintenance: "armes" } },
+      { path: "partida", name: "Partida", component: Partida, meta: { requiresMaintenance: "partida" } },
+      { path: "estadistica", name: "Estadistica", component: Estadistica, meta: { requiresMaintenance: "estadistiques" } },
+      { path: "tienda", name: "Tienda", component: Tienda, meta: { requiresMaintenance: "shops" } },
       { path: "manteniment", name: "Manteniment", component: Manteniment },
     ],
-    meta: {
-      requiresAuth: true,
-    },
+    meta: { requiresAuth: true },
   },
 ];
 
@@ -47,31 +38,26 @@ const router = createRouter({
 
 // Guard para verificar mantenimiento
 router.beforeEach(async (to, from, next) => {
-  // Verificar si la ruta requiere check de mantenimiento
   if (to.meta.requiresMaintenance) {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}api/usuarios/maintenance/status`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}api/${to.meta.requiresMaintenance}/maintenance/status`);
       const data = await response.json();
 
       if (data.maintenance) {
-        
-         return next(new Error('Servicio de usuarios en mantenimiento'));
+        window.dispatchEvent(new CustomEvent("show-snackbar", { detail: `Servei de ${to.meta.requiresMaintenance} en mantenimient` }));
+        return next(false); // Cancela la navegación
       }
     } catch (error) {
-      console.error("Error al verificar estado de mantenimiento:", error);
-      // En caso de error, permitir acceso para evitar bloqueo total
+      window.dispatchEvent(new CustomEvent("show-snackbar", { detail: "Error al verificar mantenimient" }));
       return next();
     }
   }
 
-  // Verificar autenticación (mantenemos la lógica anterior)
   const token = localStorage.getItem("token");
   const usuario = JSON.parse(localStorage.getItem("usuario"));
 
-  if (to.meta.requiresAuth) {
-    if (!token || !usuario || usuario.admin !== true) {
-      return next("/");
-    }
+  if (to.meta.requiresAuth && (!token || !usuario || usuario.admin !== true)) {
+    return next("/");
   }
 
   next();
