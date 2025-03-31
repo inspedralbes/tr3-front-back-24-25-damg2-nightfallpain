@@ -4,38 +4,7 @@ const crypto = require('crypto');
 const { UsuarisJugadors } = require('../models');
 
 const router = express.Router();
-// 📌 REGISTRO (sin JWT)
-router.post("/game/register", async (req, res) => {
-    try {
-        const { name, email, password, speed, health, damage, arma, shop } = req.body;
 
-        // Verificar si el usuario ya existe
-        const existingUser = await UsuarisJugadors.findOne({ where: { email } });
-        if (existingUser) {
-            return res.status(400).json({ error: "El correo ya está registrado" });
-        }
-
-        // Encriptar la password
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Crear usuario con valores por defecto si no se envían
-        const newUser = await UsuarisJugadors.create({
-            id: crypto.randomUUID(),
-            name,
-            email,
-            password: hashedPassword,
-            speed: speed || 10,      // Valor por defecto: 10
-            health: health || 100,   // Valor por defecto: 100
-            damage: damage || 25,    // Valor por defecto: 25
-            arma: arma || "espada",  // Valor por defecto: "espada"
-            shop: shop || "Tienda1"  // Valor por defecto: "Tienda1"
-        });
-
-        res.status(201).json({ message: "Usuario registrado con éxito", user: newUser });
-    } catch (error) {
-        res.status(500).json({ error: "Error al registrar el usuario", details: error.message });
-    }
-});
 
 // 📌 INICIAR SESIÓN (sin JWT)
 router.post('/game/login', async (req, res) => {
@@ -54,16 +23,35 @@ router.post('/game/login', async (req, res) => {
             return res.status(400).json({ error: 'Correo o contraseña incorrectos' });
         }
 
-        res.json({ message: 'Inicio de sesión exitoso', user });
+        // Convertir usuario a objeto JSON y eliminar la contraseña por seguridad
+        const userData = user.toJSON();
+        delete userData.password;  // Eliminar la contraseña de la respuesta por seguridad
+
+        // Crear un objeto de respuesta con los datos del usuario directamente desde la base de datos
+        const response = {
+            username: userData.name,  // Nombre de usuario directamente desde la base de datos
+            skinName: userData.skinName,  // Nombre del skin
+            xp: userData.xp,  // Experiencia
+            health: userData.health,  // Salud
+            speed: userData.speed,  // Velocidad
+            damage: userData.damage,
+            maxBullets: userData.maxBullets,  // Daño
+        };
+        
+
+        // Enviar la respuesta con los datos del usuario
+        res.json({ message: 'Inicio de sesión exitoso', user: response });
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: 'Error en el inicio de sesión' });
     }
 });
 
+
 // 📌 REGISTRAR USUARIO
 router.post("/register", async (req, res) => {
     try {
-        const { name, email, password, speed, health, damage, arma, shop } = req.body;
+        const { name, email, password, speed, maxBullets, health, damage, skinName, arma, shop } = req.body;
 
         // Validar que los campos obligatorios estén presentes
         if (!name || !email || !password) {
@@ -91,9 +79,11 @@ router.post("/register", async (req, res) => {
             name,
             email,
             password: hashedPassword,
-            speed: speed || 10,      // Valor por defecto: 10
+            speed: speed || 10,  
+            maxBullets: maxBullets || 10,  // Valor por defecto: 10
             health: health || 100,   // Valor por defecto: 100
-            damage: damage || 25,    // Valor por defecto: 25
+            damage: damage || 25,
+            skinName: skinName || "default"  ,  // Valor por defecto: 25
             arma: arma || "espada",  // Valor por defecto: "espada"
             shop: shop || "Tienda1"  // Valor por defecto: "Tienda1"
         });
@@ -191,5 +181,39 @@ router.delete('/delete/:id', async (req, res) => {
         res.status(500).json({ error: 'Error al eliminar el usuario', details: error.message });
     }
 });
+
+// PUT /api/usuaris/update-xp
+router.put('/game/update-xp', async (req, res) => {
+    try {
+        const { name, xp } = req.body;
+
+        // Validar que los datos sean correctos
+        if (!name || xp === undefined) {
+            return res.status(400).json({ message: "El nombre y la XP son obligatorios" });
+        }
+
+        // Buscar el usuario por nombre
+        const usuario = await UsuarisJugadors.findOne({ where: { name } });
+
+        if (!usuario) {
+            return res.status(404).json({ message: "Usuario no encontrado" });
+        }
+
+        // Actualizar la experiencia (XP)
+        usuario.xp = xp;
+        await usuario.save();
+
+        res.json({
+            message: "XP actualizado con éxito",
+            usuario
+        });
+
+    } catch (error) {
+        console.error("Error al actualizar XP:", error);
+        res.status(500).json({ message: "Error del servidor" });
+    }
+});
+
+
 
 module.exports = router;

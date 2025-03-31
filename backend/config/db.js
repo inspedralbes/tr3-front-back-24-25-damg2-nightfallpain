@@ -7,4 +7,4 @@ const sequelize = new Sequelize('mydatabase', 'myuser', 'mypassword', {
     logging: false, // Desactiva los logs de SQL en la consola
 });
 
-module.exports = sequelize;
+module.exports = sequelize; 

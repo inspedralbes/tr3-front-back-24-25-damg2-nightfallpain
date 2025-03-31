@@ -33,12 +33,20 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
+        maxBullets:{
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
         health:{
             type: DataTypes.INTEGER,
             allowNull: false,
         },
         damage:{
             type: DataTypes.INTEGER,
+            allowNull: false,
+        },
+        skinName:{
+            type: DataTypes.STRING(255),
             allowNull: false,
         },
         arma:{

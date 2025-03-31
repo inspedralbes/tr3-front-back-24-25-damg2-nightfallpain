@@ -52,7 +52,7 @@
                     <v-icon color="#ff9800" class="mr-2">mdi-sword</v-icon>
                     <span class="font-weight-bold neon-text-alt">Damage</span>
                     <v-spacer></v-spacer>
-                    <span class="text-h6 neon-value">{{ Math.round(armaSeleccionada.daño) }}</span>
+                    <span class="text-h6 neon-value">{{ armaSeleccionada.daño }}</span>
                   </div>
                   <v-slider
                     v-model.number="armaSeleccionada.daño"
@@ -60,6 +60,7 @@
                     min="0"
                     max="100"
                     hide-details
+                    step="0.1" 
                     class="neon-slider"
                   ></v-slider>
                 </v-sheet>
@@ -71,7 +72,7 @@
                     <v-icon color="#2196f3" class="mr-2">mdi-lightning-bolt</v-icon>
                     <span class="font-weight-bold neon-text-alt">Bullet Speed</span>
                     <v-spacer></v-spacer>
-                    <span class="text-h6 neon-value">{{ Math.round(armaSeleccionada.velocidadBala) }}</span>
+                    <span class="text-h6 neon-value">{{ armaSeleccionada.velocidadBala }}</span>
                   </div>
                   <v-slider
                     v-model.number="armaSeleccionada.velocidadBala"
@@ -79,6 +80,7 @@
                     min="0"
                     max="50"
                     hide-details
+                    step="0.1" 
                     class="neon-slider"
                   ></v-slider>
                 </v-sheet>

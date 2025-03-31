@@ -79,7 +79,7 @@
                     <v-icon color="#ff2c2c" class="mr-2">mdi-heart</v-icon>
                     <span class="font-weight-bold neon-text-alt">Health</span>
                     <v-spacer></v-spacer>
-                    <span class="text-h6 neon-value">{{ Math.round(enemigoSeleccionado.health) }}</span>
+                    <span class="text-h6 neon-value">{{ enemigoSeleccionado.health }}</span>
                   </div>
                   <v-slider
                     v-model.number="enemigoSeleccionado.health"
@@ -87,6 +87,7 @@
                     min="0"
                     max="200"
                     hide-details
+                    step="0.1" 
                     class="neon-slider"
                   ></v-slider>
                 </v-sheet>
@@ -98,7 +99,7 @@
                     <v-icon color="#ff9800" class="mr-2">mdi-sword</v-icon>
                     <span class="font-weight-bold neon-text-alt">Damage</span>
                     <v-spacer></v-spacer>
-                    <span class="text-h6 neon-value">{{ Math.round(enemigoSeleccionado.damage) }}</span>
+                    <span class="text-h6 neon-value">{{ enemigoSeleccionado.damage }}</span>
                   </div>
                   <v-slider
                     v-model.number="enemigoSeleccionado.damage"
@@ -106,6 +107,7 @@
                     min="0"
                     max="50"
                     hide-details
+                    step="0.1" 
                     class="neon-slider"
                   ></v-slider>
                 </v-sheet>
@@ -117,7 +119,7 @@
                     <v-icon color="#2196f3" class="mr-2">mdi-lightning-bolt</v-icon>
                     <span class="font-weight-bold neon-text-alt">Speed</span>
                     <v-spacer></v-spacer>
-                    <span class="text-h6 neon-value">{{ Math.round(enemigoSeleccionado.speed) }}</span>
+                    <span class="text-h6 neon-value">{{ enemigoSeleccionado.speed}}</span>
                   </div>
                   <v-slider
                     v-model.number="enemigoSeleccionado.speed"
@@ -125,6 +127,7 @@
                     min="0"
                     max="5"
                     hide-details
+                    step="0.1" 
                     class="neon-slider"
                   ></v-slider>
                 </v-sheet>
