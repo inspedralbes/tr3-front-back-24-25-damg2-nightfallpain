@@ -59,6 +59,15 @@ router.post('/create', async (req, res) => {
         res.status(500).json({ error: 'Error al crear la partida' });
     }
 });
+router.get('/all', async (req, res) => {
+    try {
+        const partidas = await Partida.find().select('-__v'); // Excluye el campo __v
+        res.status(200).json(partidas);
+    } catch (error) {
+        console.error('Error al obtener partidas:', error);
+        res.status(500).json({ error: 'Error al obtener las partidas' });
+    }
+});
 
 
 module.exports = router;
