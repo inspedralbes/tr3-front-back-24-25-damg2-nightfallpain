@@ -33,13 +33,32 @@ router.get('/maintenance/status', (req, res) => {
 // Aplicar middleware a todas las rutas
 router.use(maintenanceMiddleware);
 // Crear una partida
-router.post('/', async (req, res) => {
+router.post('/create', async (req, res) => {
     try {
-        const nuevaPartida = await Partida.create(req.body);
-        res.status(201).json(nuevaPartida);
+        const { usuari_id } = req.body;
+        
+        if (!usuari_id) {
+            return res.status(400).json({ error: 'Se requiere el ID del usuario' });
+        }
+        
+        // Creamos la partida (siempre en modo singleplayer)
+        const nuevaPartida = new Partida({
+            usuari_id,
+            tipus_partida: 'singleplayer'
+        });
+        
+        const partidaGuardada = await nuevaPartida.save();
+        
+        res.status(201).json({
+            success: true,
+            message: 'Partida creada correctamente',
+            partida: partidaGuardada
+        });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Error al crear partida:', error);
+        res.status(500).json({ error: 'Error al crear la partida' });
     }
 });
+
 
 module.exports = router;
