@@ -7,6 +7,35 @@ const path = require('path');
 const fs = require('fs');
 const app = express();
 
+// Estado de mantenimiento para usuarios
+let maintenanceMode = false;
+
+// Middleware de mantenimiento
+const maintenanceMiddleware = (req, res, next) => {
+    if (maintenanceMode) {
+        return res.status(503).json({ 
+            message: 'Servicio en mantenimiento', 
+            maintenance: true 
+        });
+    }
+    next();
+};
+
+// Rutas de control de mantenimiento
+router.post('/maintenance/toggle', (req, res) => {
+    maintenanceMode = !maintenanceMode;
+    res.json({ 
+        message: `Modo mantenimiento ${maintenanceMode ? 'activado' : 'desactivado'}`, 
+        maintenance: maintenanceMode 
+    });
+});
+
+router.get('/maintenance/status', (req, res) => {
+    res.json({ maintenance: maintenanceMode });
+});
+
+// Aplicar middleware a todas las rutas
+router.use(maintenanceMiddleware);
 // Define upload directory
 // Definir el directorio de subida
 const uploadDir = path.join(__dirname, '../uploads/shop');  // Aquí debería estar en una carpeta dentro del contenedor
@@ -189,7 +218,8 @@ router.post('/new', upload.single('image'), async (req, res) => {
             type, 
             image: imageName // Guardamos solo el nombre del archivo
         });
-        
+        const io = req.io;
+        io.emit('newProduct', shop);
         res.status(201).json(shop);
     } catch (error) {
         console.error(error);
@@ -236,7 +266,8 @@ router.put('/update/:id', upload.single('image'), async (req, res) => {
             type: type || shop.type, 
             image: imageName // Guardamos solo el nombre del archivo
         });
-        
+        const io = req.io;
+        io.emit('updateProduct', shop);
         res.json(shop);
     } catch (error) {
         console.error(error);
@@ -260,6 +291,10 @@ router.delete('/delete/:id', async (req, res) => {
         
         // Eliminar el producto
         await shop.destroy();
+        
+        // Emitir evento de socket para producto eliminado
+        const io = req.io;
+        io.emit('deleteProduct', { id: req.params.id });
         
         res.json({ message: 'Producto eliminado correctamente' });
     } catch (error) {

@@ -7,6 +7,7 @@ import Usuarios from "@/components/Admin/Usuarios.vue";
 import Enemigos from "@/components/Admin/Enemigos.vue";
 import Armas from "@/components/Admin/Armas.vue";
 import Partida from "@/components/Admin/Partida.vue";
+import Manteniment from "@/components/Admin/Manteniment.vue";
 
 const routes = [
   {
@@ -18,16 +19,15 @@ const routes = [
     path: "/admin",
     component: AdminDashboard,
     children: [
-      { path: "usuarios", name: "Usuarios", component: Usuarios },
-      { path: "enemigos", name: "Enemigos", component: Enemigos },
-      { path: "armas", name: "Armas", component: Armas },
-      { path: "partida", name: "Partida", component: Partida },
-      { path: "estadistica", name: "Estadistica", component: Estadistica },
-      { path: "tienda", name: "Tienda", component: Tienda },
+      { path: "usuarios", name: "Usuarios", component: Usuarios, meta: { requiresMaintenance: "usuarios" } },
+      { path: "enemigos", name: "Enemigos", component: Enemigos, meta: { requiresMaintenance: "enemics" } },
+      { path: "armas", name: "Armas", component: Armas, meta: { requiresMaintenance: "armes" } },
+      { path: "partida", name: "Partida", component: Partida, meta: { requiresMaintenance: "partida" } },
+      { path: "estadistica", name: "Estadistica", component: Estadistica, meta: { requiresMaintenance: "estadistiques" } },
+      { path: "tienda", name: "Tienda", component: Tienda, meta: { requiresMaintenance: "shops" } },
+      { path: "manteniment", name: "Manteniment", component: Manteniment },
     ],
-    meta: {
-      requiresAuth: true, // Marcar rutas que requieren autenticación de administrador
-    },
+    meta: { requiresAuth: true },
   },
 ];
 
@@ -36,19 +36,31 @@ const router = createRouter({
   routes,
 });
 
-// Guard para verificar la autenticación antes de acceder a las rutas protegidas
-router.beforeEach((to, from, next) => {
+// Guard para verificar mantenimiento
+router.beforeEach(async (to, from, next) => {
+  if (to.meta.requiresMaintenance) {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}api/${to.meta.requiresMaintenance}/maintenance/status`);
+      const data = await response.json();
+
+      if (data.maintenance) {
+        window.dispatchEvent(new CustomEvent("show-snackbar", { detail: `Servei de ${to.meta.requiresMaintenance} en mantenimient` }));
+        return next(false); // Cancela la navegación
+      }
+    } catch (error) {
+      window.dispatchEvent(new CustomEvent("show-snackbar", { detail: "Error al verificar mantenimient" }));
+      return next();
+    }
+  }
+
   const token = localStorage.getItem("token");
   const usuario = JSON.parse(localStorage.getItem("usuario"));
 
-  // Verificar si la ruta requiere autenticación y si el usuario no está autenticado
-  if (to.meta.requiresAuth) {
-    // Si no hay token o el usuario no es admin, redirigir al login
-    if (!token || !usuario || usuario.admin !== true) {
-      return next("/");
-    }
+  if (to.meta.requiresAuth && (!token || !usuario || usuario.admin !== true)) {
+    return next("/");
   }
-  next(); // Permitir el acceso
+
+  next();
 });
 
 export default router;

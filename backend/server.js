@@ -1,26 +1,56 @@
 const express = require('express');
-const cors = require('cors'); // Importar CORS
-const conectarDB = require('./config/mongo'); // Conexión a MongoDB
-const { sequelize } = require('./models'); // Conexión a Sequelize
+const cors = require('cors');
+const http = require('http');
+const { Server } = require('socket.io');
+
+const conectarDB = require('./config/mongo');
+const { sequelize } = require('./models');
 const usuariosRoutes = require('./routes/usuarisJugadors');
 const enemicsRoutes = require('./routes/enemics');
 const shopRoutes = require('./routes/shops');
+const weaponRoutes = require('./routes/armes');
+const partidaRoutes = require('./routes/partida');
+const estadistiquesRoutes = require('./routes/estadistiques');
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: '*',
+        methods: ['GET', 'POST', 'PUT', 'DELETE']
+    }
+});
+
 app.use(express.json());
 
-// 🛑 Configurar CORS para permitir peticiones del frontend
+// Configurar CORS
 app.use(cors({
-    origin: '*', // Puedes cambiar '*' por 'http://localhost:5173' si usas Vue en Vite
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
 }));
-app.use('/uploads/shop', express.static('uploads/shop'));
+
+app.use('/uploads/shop', express.static('/var/back/uploads/shop'));
 
 // Usar rutas
+app.use('/api/estadistiques', estadistiquesRoutes);
+app.use('/api/armes', weaponRoutes);
+app.use('/api/partida', partidaRoutes);
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/enemics', enemicsRoutes);
-app.use('/api/shops', shopRoutes);
+app.use('/api/shops', (req, res, next) => {
+    req.io = io; // Inyectar Socket.IO en la solicitud
+    next();
+}, shopRoutes);
+
+// Conexión de Socket.IO
+io.on('connection', (socket) => {
+    console.log('Cliente conectado via Socket');
+
+    socket.on('disconnect', () => {
+        console.log('Cliente desconectado');
+    });
+});
 
 // Conectar a MongoDB
 conectarDB();
@@ -32,4 +62,6 @@ sequelize.authenticate()
 
 // Iniciar servidor
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Servidor corriendo en el puerto ${PORT}`));
+server.listen(PORT, "0.0.0.0", () => console.log(`🚀 Servidor corriendo en el puerto ${PORT}`));
+
+module.exports = { io }; // Exportar `io` para usarlo en las rutas

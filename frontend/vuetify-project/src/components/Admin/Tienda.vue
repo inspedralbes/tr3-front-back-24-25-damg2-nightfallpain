@@ -139,6 +139,7 @@
 </template>
 
 <script>
+import io from 'socket.io-client';
 export default {
   name: "Tienda",
   data() {
@@ -158,15 +159,49 @@ export default {
       mantenimiento: false,
       adminSecret: localStorage.getItem("adminSecret") || "",  // Guardar clave secreta
       deleteDialog: false,
-      productoSeleccionado: null
+      productoSeleccionado: null,
+      socket: null
     };
   },
 
   created() {
     this.verificarEstadoMantenimiento();
     this.cargarProductos();
+    this.initSocket();
+  },
+  beforeUnmount() {
+    // Desconectar socket al salir del componente
+    if (this.socket) {
+      this.socket.disconnect();
+    }
   },
   methods: {
+    initSocket() {
+      // Conectar al socket (ajusta la URL de tu backend)
+      this.socket = io(import.meta.env.VITE_API_URL);
+
+      // Escuchar evento de nuevo producto
+      this.socket.on('newProduct', (producto) => {
+        this.productos.push(producto);
+      });
+
+      // Escuchar evento de actualización de producto
+      this.socket.on('updateProduct', (productoActualizado) => {
+        const index = this.productos.findIndex(p => p.id === productoActualizado.id);
+        if (index !== -1) {
+          this.productos.splice(index, 1, productoActualizado);
+        }
+      });
+
+      // Escuchar evento de eliminación de producto
+      this.socket.on('deleteProduct', ({ id }) => {
+        const index = this.productos.findIndex(p => p.id === id);
+        if (index !== -1) {
+          this.productos.splice(index, 1);
+        }
+      });
+    },
+
     handleImageChange(event) {
     const file = event.target.files[0];
 

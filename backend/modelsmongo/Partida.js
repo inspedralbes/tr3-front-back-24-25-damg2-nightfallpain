@@ -7,19 +7,13 @@ const PartidaSchema = new mongoose.Schema({
     },  // UUID del usuario
     tipus_partida: { 
         type: String, 
-        enum: ['singleplayer', 'multiplayer'], 
-        required: true 
+        enum: ['singleplayer'], // Debe ser un array con los valores permitidos
+        required: true,
+        default: 'singleplayer' // Establecemos valor por defecto
     },
-    estat: { 
-        type: String, 
-        enum: ['enJuego', 'Acabado'], 
-        required: true 
-    },
-    id_coperative: { 
-        type: String, 
-        required: function() { 
-            return this.tipus_partida === 'multiplayer'; 
-        }
+    createdAt: {
+        type: Date,
+        default: Date.now
     }
 });
 
