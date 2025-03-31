@@ -108,7 +108,7 @@ export default {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding-top: 40px;
+  padding-top: 0px;
 }
 
 .auth-card {
