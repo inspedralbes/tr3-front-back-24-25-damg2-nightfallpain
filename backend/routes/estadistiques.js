@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Estadistica = require('../modelsmongo/Estadistiques');
+const { spawn } = require('child_process'); // Importar spawn
 
 // Estado de mantenimiento para usuarios
 let maintenanceMode = false;
@@ -30,7 +31,6 @@ router.use(maintenanceMiddleware);
 
 // 📌 **Ruta para recibir estadísticas desde Unity**
 // Backend: actualizar la ruta para guardar estadísticas
-// Backend: ruta actualizada para guardar estadísticas con score
 router.post('/guardarEstadisticas', async (req, res) => {
     try {
         const { usuari_id, temps, puntuacio } = req.body;
@@ -81,5 +81,60 @@ router.post('/guardarEstadisticas', async (req, res) => {
     }
 });
 
+// 📌 **Ruta para obtener las estadísticas de un usuario específico**
+router.get('/getEstadisticas/:usuari_id', async (req, res) => {
+    try {
+        const { usuari_id } = req.params;
+
+        // Buscar las estadísticas del usuario en la base de datos
+        const estadisticas = await Estadistica.find({ usuari_id });
+
+        if (estadisticas.length === 0) {
+            return res.status(404).json({ 
+                message: `No se encontraron estadísticas para el usuario ${usuari_id}` 
+            });
+        }
+
+        res.status(200).json({
+            message: "Estadísticas obtenidas correctamente",
+            data: estadisticas
+        });
+    } catch (error) {
+        console.error("Error al obtener estadísticas:", error);
+        res.status(500).json({
+            error: "Error interno del servidor",
+            details: error.message
+        });
+    }
+});
+
+// Ruta para generar el gráfico por usuario
+router.get('/grafico/:usuari_id', async (req, res) => {
+    try {
+        const { usuari_id } = req.params;
+
+        // Ejecutar el script Python utilizando spawn
+        const pythonProcess = spawn('python', ['grafico.py', usuari_id]);
+
+        pythonProcess.stdout.on('data', (data) => {
+            console.log(`stdout: ${data}`);
+        });
+
+        pythonProcess.stderr.on('data', (data) => {
+            console.error(`stderr: ${data}`);
+        });
+
+        pythonProcess.on('close', (code) => {
+            if (code === 0) {
+                res.status(200).json({ message: 'Gráfico generado exitosamente' });
+            } else {
+                res.status(500).json({ error: 'Hubo un problema al generar el gráfico' });
+            }
+        });
+    } catch (error) {
+        console.error('Error al generar el gráfico:', error);
+        res.status(500).json({ error: 'Error interno al generar el gráfico' });
+    }
+});
 
 module.exports = router;
