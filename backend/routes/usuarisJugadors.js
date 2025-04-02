@@ -108,10 +108,10 @@ router.post("/register", async (req, res) => {
             name,
             email,
             password: hashedPassword,
-            speed: speed || 10,  
-            maxBullets: maxBullets || 10,  // Valor por defecto: 10
-            health: health || 100,   // Valor por defecto: 100
-            damage: damage || 25,
+            speed: speed || 5,  
+            maxBullets: maxBullets || 25,  // Valor por defecto: 10
+            health: health || 200,   // Valor por defecto: 100
+            damage: damage || 50,
             skinName: skinName || "default"  ,  // Valor por defecto: 25
             arma: arma || "espada",  // Valor por defecto: "espada"
             shop: shop || "Tienda1"  // Valor por defecto: "Tienda1"
@@ -127,7 +127,23 @@ router.post("/register", async (req, res) => {
 // 📌 INICIAR SESIÓN (sin JWT)
 const jwt = require('jsonwebtoken');
 const SECRET_KEY = 'tu_clave_secreta'; // Cambia esto por una clave secreta segura
+// 📌 OBTENER TODOS LOS EMAILS Y NOMBRES DE USUARIOS
+router.get('/players', async (req, res) => {
+    try {
+        const usuarios = await UsuarisJugadors.findAll({
+            attributes: ['id', 'name', 'email'], // Incluimos id y email también
+            order: [['name', 'ASC']]
+        });
 
+        res.json(usuarios);
+    } catch (error) {
+        console.error('Error al obtener nombres de usuarios:', error);
+        res.status(500).json({ 
+            error: 'Error al obtener nombres de usuarios',
+            details: error.message 
+        });
+    }
+});
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;

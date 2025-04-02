@@ -85,7 +85,7 @@
                     v-model.number="enemigoSeleccionado.health"
                     color="#ff2c2c"
                     min="0"
-                    max="200"
+                    max="30"
                     hide-details
                     step="0.1" 
                     class="neon-slider"
@@ -105,7 +105,7 @@
                     v-model.number="enemigoSeleccionado.damage"
                     color="#ff9800"
                     min="0"
-                    max="50"
+                    max="30"
                     hide-details
                     step="0.1" 
                     class="neon-slider"
@@ -125,7 +125,7 @@
                     v-model.number="enemigoSeleccionado.speed"
                     color="#2196f3"
                     min="0"
-                    max="5"
+                    max="3"
                     hide-details
                     step="0.1" 
                     class="neon-slider"

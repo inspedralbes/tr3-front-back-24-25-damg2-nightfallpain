@@ -80,7 +80,7 @@ export default {
     const fetchPartidas = async () => {
       loading.value = true;
       try {
-        const response = await fetch("http://localhost:3000/api/partida/all");
+        const response = await fetch(`${import.meta.env.VITE_API_URL}api/partida/all`);
         if (!response.ok) throw new Error("Error al obtener las partidas");
         partidas.value = await response.json();
       } catch (error) {

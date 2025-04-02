@@ -25,7 +25,9 @@ router.post('/maintenance/toggle', (req, res) => {
         maintenance: maintenanceMode 
     });
 });
-
+router.get('/maintenance/status', (req, res) => {
+    res.json({ maintenance: maintenanceMode });
+});
 // Aplicar middleware a todas las rutas
 router.use(maintenanceMiddleware);
 
@@ -80,7 +82,37 @@ router.post('/guardarEstadisticas', async (req, res) => {
         });
     }
 });
+// 📌 Ruta para obtener solo los usuari_id únicos
+router.get('/usuaris-ids', async (req, res) => {
+    try {
+        // Agregación para obtener solo los IDs de usuario únicos
+        const usuaris = await Estadistica.aggregate([
+            {
+                $group: {
+                    _id: "$usuari_id"
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    id: "$_id"
+                }
+            },
+            { $sort: { id: 1 } }
+        ]);
 
+        res.status(200).json({
+            message: "IDs de usuario obtenidos correctamente",
+            data: usuaris
+        });
+    } catch (error) {
+        console.error("Error al obtener usuarios:", error);
+        res.status(500).json({
+            error: "Error interno del servidor",
+            details: error.message
+        });
+    }
+});
 // 📌 **Ruta para obtener las estadísticas de un usuario específico**
 router.get('/getEstadisticas/:usuari_id', async (req, res) => {
     try {
@@ -108,32 +140,89 @@ router.get('/getEstadisticas/:usuari_id', async (req, res) => {
     }
 });
 
-// Ruta para generar el gráfico por usuario
+// Ruta para generar y devolver el gráfico por usuario
 router.get('/grafico/:usuari_id', async (req, res) => {
     try {
         const { usuari_id } = req.params;
+        const path = require('path');
+        const fs = require('fs');
+        
+        // 1. Verificar si hay datos para el usuario
+        const tieneDatos = await Estadistica.exists({ usuari_id });
+        if (!tieneDatos) {
+            return res.status(404).json({
+                error: 'Usuario sin datos',
+                message: `No hay estadísticas para el usuario ${usuari_id}`
+            });
+        }
 
-        // Ejecutar el script Python utilizando spawn
-        const pythonProcess = spawn('python', ['grafico.py', usuari_id]);
+        // 2. Configuración de rutas
+        const outputDir = path.join(__dirname, '..', 'graficos');
+        if (!fs.existsSync(outputDir)) {
+            fs.mkdirSync(outputDir, { recursive: true });
+        }
+        
+        const outputFile = path.join(outputDir, `grafico_usuario_${usuari_id}.png`);
+        
+        // 3. Eliminar gráfico existente si hay
+        if (fs.existsSync(outputFile)) {
+            fs.unlinkSync(outputFile);
+        }
 
+        // 4. Configuración Python
+        const pythonPath = '/usr/bin/python3';
+        const scriptPath = path.join(__dirname, '..', 'python', 'grafico.py');
+        
+        console.log(`Ejecutando: ${pythonPath} ${scriptPath} ${usuari_id}`);
+        
+        // 5. Ejecutar Python
+        const pythonProcess = spawn(pythonPath, [scriptPath, usuari_id]);
+
+        let errorData = '';
+        let outputData = '';
+        
         pythonProcess.stdout.on('data', (data) => {
-            console.log(`stdout: ${data}`);
+            outputData += data.toString();
+            console.log(`Python stdout: ${data}`);
         });
-
+        
         pythonProcess.stderr.on('data', (data) => {
-            console.error(`stderr: ${data}`);
+            errorData += data.toString();
+            console.error(`Python stderr: ${data}`);
         });
-
+        
+        // 6. Manejar resultado
         pythonProcess.on('close', (code) => {
-            if (code === 0) {
-                res.status(200).json({ message: 'Gráfico generado exitosamente' });
+            if (code === 0 && fs.existsSync(outputFile)) {
+                res.setHeader('Content-Type', 'image/png');
+                return fs.createReadStream(outputFile).pipe(res);
             } else {
-                res.status(500).json({ error: 'Hubo un problema al generar el gráfico' });
+                const errorDetails = {
+                    error: 'Error al generar el gráfico',
+                    pythonError: errorData,
+                    output: outputData,
+                    exitCode: code,
+                    fileExists: fs.existsSync(outputFile)
+                };
+                console.error('Error en Python:', errorDetails);
+                return res.status(500).json(errorDetails);
             }
         });
+        
+        pythonProcess.on('error', (err) => {
+            console.error('Error al iniciar Python:', err);
+            return res.status(500).json({
+                error: 'Error al ejecutar Python',
+                details: err.message
+            });
+        });
+        
     } catch (error) {
-        console.error('Error al generar el gráfico:', error);
-        res.status(500).json({ error: 'Error interno al generar el gráfico' });
+        console.error('Error en endpoint /grafico:', error);
+        res.status(500).json({ 
+            error: 'Error interno del servidor',
+            details: error.message 
+        });
     }
 });
 
